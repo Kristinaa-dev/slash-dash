@@ -15,3 +15,8 @@ Pozriet sa na Grafanu
       - low,high atd a high posielat na mobil alebo tak
       - a ostatne inde
   - maju to celkom dobre urobene
+
+6/25/2024
+  - zaciatok programovania
+  - napad ze urobit z toho docker image aby sa to lahsie installovalo/spustalo
+  - urobit CLI program ktory bude vypisovat teda CPU, RAM, DISK, usage atd...
