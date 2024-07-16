@@ -36,3 +36,16 @@ Pozriet sa na Grafanu
   - pridala som veci na disk usage
   - skusila pozriet na to runnovanie procesov
   - su na to 2 sposoby subprocess a os ale ten subprocess je better
+
+
+7/16/2024
+  - today I plan on creating basic Flask app for the project
+  - also should solve the merge request from PC to notebook
+  - created venv for this project
+  - decided I will use Django instead of flask
+  - performed basic testing database setup
+
+
+  - idea I got while looking at the documentation is to store the command user adds in a database
+  - the layout could me be something like access group command priv needed for the command maybe time stamps
+  - also idk if good idea but store the autorun cmds in a DB
