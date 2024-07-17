@@ -49,3 +49,7 @@ Pozriet sa na Grafanu
   - idea I got while looking at the documentation is to store the command user adds in a database
   - the layout could me be something like access group command priv needed for the command maybe time stamps
   - also idk if good idea but store the autorun cmds in a DB
+
+7/17/2024
+  - begin learning about views
+  - add some sample basic database
