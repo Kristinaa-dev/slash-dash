@@ -1,0 +1,48 @@
+<!-- monitor/templates/monitor/index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Monitor</title>
+    <script>
+        async function fetchSystemData() {
+            try {
+                const response = await fetch('/system-data/');
+                const data = await response.json();
+                document.getElementById('cpu_usage').innerText = data.cpu_usage + '%';
+                document.getElementById('memory_total').innerText = formatBytes(data.memory_info);
+                document.getElementById('memory_used').innerText = formatBytes(data.memory_used);
+                document.getElementById('memory_free').innerText = formatBytes(data.memory_info - data.memory_used);
+                document.getElementById('memory_percent').innerText = data.memory_percent + '%';
+            } catch (error) {
+                console.error('Error fetching system data:', error);
+            }
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        setInterval(fetchSystemData, 1000);
+
+        window.onload = fetchSystemData;
+    </script>
+</head>
+<body>
+    <h1>System Resource Monitor</h1>
+    <h2>CPU Usage</h2>
+    <p id="cpu_usage">{{ cpu_usage }}%</p>
+
+    <h2>Memory Usage</h2>
+    <p>Total: <span id="memory_total">{{ memory_total }}</span></p>
+    <p>Used: <span id="memory_used">{{ memory_used|filesizeformat }}</span></p>
+    <p>Free: <span id="memory_free">{{ memory_free|filesizeformat }}</span></p>
+    <p>Percentage Used: <span id="memory_percent">{{ memory_percent }}%</span></p>
+</body>
+</html>
+

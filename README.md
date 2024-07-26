@@ -53,3 +53,8 @@ Pozriet sa na Grafanu
 7/17/2024
   - begin learning about views
   - add some sample basic database
+
+7/24/2024
+  - create user databse
+  - should be simple enough
+  - w3 schools tutorial which I will make custom
