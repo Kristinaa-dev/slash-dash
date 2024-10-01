@@ -6,6 +6,7 @@ import psutil
 def get_system_data():
     cpu_usage = psutil.cpu_percent(interval=1)
     memory_info = psutil.virtual_memory()
+    disk_info = psutil.disk_usage('/')
     
     return {
         'cpu_usage': cpu_usage,
@@ -13,6 +14,9 @@ def get_system_data():
         'memory_used': memory_info.used,
         'memory_free': memory_info.free,
         'memory_percent': memory_info.percent,
+        'disk_total': disk_info.total,
+        'disk_used': disk_info.used,
+        'disk_free': disk_info.free,
     }
     
 

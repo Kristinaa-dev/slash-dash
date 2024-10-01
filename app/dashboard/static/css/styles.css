@@ -1,0 +1,40 @@
+.container {
+    display: flex;
+}
+
+.side-panel {
+    width: 250px;
+    background-color: #161616;
+    padding: 20px;
+    height: 100vh; /* Full height */
+    box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.side-panel ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.side-panel li {
+    margin: 20px 0;
+}
+
+.side-panel a {
+    text-decoration: none;
+    color: #e6e3e3;
+    font-weight: bold;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+}
+body {
+    background-color: black;
+    color: white;
+}
+.container-graphs{
+    width: 50%;
+    height: auto;
+    margin: 0 auto;
+}
