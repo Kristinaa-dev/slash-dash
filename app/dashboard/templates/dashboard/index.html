@@ -4,6 +4,7 @@
 {% endblock %}
 
 {% block content %}
+<!-- dashboard/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,15 +35,38 @@
             border-radius: 8px;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            height: 400px; /* Fixed height for each grid item */
+            height: 400px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
+        .services-card {
+            grid-column: 1 / -1; /* Span all columns */
+            height: auto; /* Let height adjust based on content */
+            overflow-y: auto; /* Scroll if content exceeds height */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
         canvas {
             width: 100% !important;
-            max-height: 300px !important; /* Set a fixed max height for canvas */
+            max-height: 300px !important;
         }
     </style>
 </head>
@@ -60,6 +84,29 @@
         <div class="grid-item">
             <h2>Disk Usage</h2>
             <canvas id="diskChart"></canvas>
+        </div>
+        <div class="grid-item services-card">
+            <h2>Running Services</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>PID</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody id="servicesBody">
+                    {% for service in services %}
+                    <tr>
+                        <td>{{ service.display_name }}</td>
+                        <td>{{ service.status }}</td>
+                        <td>{{ service.pid|default:'-' }}</td>
+                        <td>{{ service.username|default:'-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -89,7 +136,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,  // Maintain chart aspect ratio
+                maintainAspectRatio: true,
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -113,7 +160,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,  // Maintain chart aspect ratio
+                maintainAspectRatio: true,
             }
         });
 
@@ -131,11 +178,11 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,  // Maintain chart aspect ratio
+                maintainAspectRatio: true,
             }
         });
 
-        // Function to update charts periodically
+        // Function to update charts and services periodically
         function updateData() {
             fetch("{% url 'system_data' %}")
                 .then(response => response.json())
@@ -161,6 +208,31 @@
                     var diskUsedPercent = (data.disk_used / data.disk_total) * 100;
                     diskChart.data.datasets[0].data = [diskUsedPercent, 100 - diskUsedPercent];
                     diskChart.update();
+
+                    // Update Services Table
+                    var servicesBody = document.getElementById('servicesBody');
+                    servicesBody.innerHTML = '';
+                    data.services.forEach(function(service) {
+                        var row = document.createElement('tr');
+
+                        var nameCell = document.createElement('td');
+                        nameCell.textContent = service.display_name || service.name;
+                        row.appendChild(nameCell);
+
+                        var statusCell = document.createElement('td');
+                        statusCell.textContent = service.status;
+                        row.appendChild(statusCell);
+
+                        var pidCell = document.createElement('td');
+                        pidCell.textContent = service.pid || '-';
+                        row.appendChild(pidCell);
+
+                        var userCell = document.createElement('td');
+                        userCell.textContent = service.username || '-';
+                        row.appendChild(userCell);
+
+                        servicesBody.appendChild(row);
+                    });
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }
@@ -170,5 +242,6 @@
     </script>
 </body>
 </html>
+
 
 {% endblock %}
