@@ -1,129 +1,174 @@
-{% extends 'base.html' %}
-{% load static%}
-{% block title %}Dashboard{% endblock %}
+{% extends 'base.html' %}{}{% load static %}
+{% block title %}
+  Dashboard
+{% endblock %}
 
 {% block content %}
-
-
 <!DOCTYPE html>
-<html>
-  <head>
-    {% comment %} <title>System Monitor</title> {% endcomment %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.css"> {% endcomment %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>System Usage Dashboard</title>
     <style>
-      body {
-        background-color: black;
-        color: white;
-      }
-      #cpuChart {
-        background-color: rgba(255, 255, 255, 0.02);
-      }
-      #diskChart {
-        background-color: rgba(255, 255, 255, 0.02);
-      }
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .grid-item {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 400px; /* Fixed height for each grid item */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        canvas {
+            width: 100% !important;
+            max-height: 300px !important; /* Set a fixed max height for canvas */
+        }
     </style>
-    <script>
-      async function fetchSystemData() {
-        try {
-          const response = await fetch('/system-data/');
-          const data = await response.json();
-          
-          // Push the new data into the chart's data array
-          cpuChart.data.labels.push(new Date().toLocaleTimeString());
-          cpuChart.data.datasets[0].data.push(data.cpu_usage);
-          
-          diskChart.data.datasets[0].data[0] = data.disk_used;
-          diskChart.data.datasets[0].data[1] = data.disk_free;
-          
-          // Make sure we only display a limited number of data points
-          const maxDataPoints = 60;
-          if (cpuChart.data.labels.length > maxDataPoints) {
-            cpuChart.data.labels.shift();
-            cpuChart.data.datasets[0].data.shift();
-          }
-          
-          // Update the chart
-          cpuChart.update()
-          diskChart.update()
-        } catch (error) {
-          console.error('Error fetching system data:', error)
-        }
-      }
-      
-      function formatBytes(bytes, decimals = 2) {
-        if (bytes === 0) return '0 Bytes'
-        const k = 1024
-        const dm = decimals < 0 ? 0 : decimals
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-        const i = Math.floor(Math.log(bytes) / Math.log(k))
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
-      }
-      
-      setInterval(fetchSystemData, 1000)
-      
-      window.onload = fetchSystemData
-    </script>
-    
-  </head>
-  <body>
-    
-    <h1>System Resource Monitor</h1>
-    <div class="container-graphs">
-      <div class="jebne-ma">
-        <canvas id="cpuChart"></canvas>
-      </div>
-      <div>
-        <canvas id="diskChart"></canvas>
-      </div>
+</head>
+<body>
+    <h1>System Usage Dashboard</h1>
+    <div class="grid-container">
+        <div class="grid-item">
+            <h2>CPU Usage</h2>
+            <canvas id="cpuChart"></canvas>
+        </div>
+        <div class="grid-item">
+            <h2>Memory Usage</h2>
+            <canvas id="memoryChart"></canvas>
+        </div>
+        <div class="grid-item">
+            <h2>Disk Usage</h2>
+            <canvas id="diskChart"></canvas>
+        </div>
     </div>
+
+    <!-- Include Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-      var ctx2 = document.getElementById('cpuChart').getContext('2d')
-      var cpuChart = new Chart(ctx2, {
-        type: 'line',
-        data: {
-          labels: [], // This will be the timestamps
-          datasets: [
-          {
-            label: 'CPU Usage',
-            data: [], // This will be the CPU usage data
-            borderColor: 'rgba(75, 192, 192, 1)',
-            
-            fill: true,
-            backgroundColor: 'rgba(75, 192, 192, 0.4)',
-            
-          }
-          ]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100
-              
+        // Initialize charts with initial data from context
+        var cpuUsage = {{ cpu_usage }};
+        var memoryPercent = {{ memory_percent }};
+        var diskUsedPercent = ({{ disk_used }} / {{ disk_total }}) * 100;
+
+        // Create CPU Line Chart
+        var cpuChartCtx = document.getElementById('cpuChart').getContext('2d');
+        var cpuChart = new Chart(cpuChartCtx, {
+            type: 'line',
+            data: {
+                labels: [new Date().toLocaleTimeString()],
+                datasets: [{
+                    label: 'CPU Usage (%)',
+                    data: [cpuUsage],
+                    backgroundColor: 'rgba(54,162,235,0.2)',
+                    borderColor: 'rgba(54,162,235,1)',
+                    fill: false,
+                    tension: 0.1,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,  // Maintain chart aspect ratio
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
             }
-          }
+        });
+
+        // Create Memory Doughnut Chart
+        var memoryChartCtx = document.getElementById('memoryChart').getContext('2d');
+        var memoryChart = new Chart(memoryChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Used (%)', 'Free (%)'],
+                datasets: [{
+                    data: [memoryPercent, 100 - memoryPercent],
+                    backgroundColor: ['#FFCE56', '#4BC0C0'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,  // Maintain chart aspect ratio
+            }
+        });
+
+        // Create Disk Doughnut Chart
+        var diskChartCtx = document.getElementById('diskChart').getContext('2d');
+        var diskChart = new Chart(diskChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Used (%)', 'Free (%)'],
+                datasets: [{
+                    data: [diskUsedPercent, 100 - diskUsedPercent],
+                    backgroundColor: ['#9966FF', '#FF9F40'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,  // Maintain chart aspect ratio
+            }
+        });
+
+        // Function to update charts periodically
+        function updateData() {
+            fetch("{% url 'system_data' %}")
+                .then(response => response.json())
+                .then(data => {
+                    var currentTime = new Date().toLocaleTimeString();
+
+                    // Update CPU chart
+                    cpuChart.data.labels.push(currentTime);
+                    cpuChart.data.datasets[0].data.push(data.cpu_usage);
+
+                    // Limit data points to the last 20 entries
+                    if (cpuChart.data.labels.length > 20) {
+                        cpuChart.data.labels.shift();
+                        cpuChart.data.datasets[0].data.shift();
+                    }
+                    cpuChart.update();
+
+                    // Update Memory chart
+                    memoryChart.data.datasets[0].data = [data.memory_percent, 100 - data.memory_percent];
+                    memoryChart.update();
+
+                    // Update Disk chart
+                    var diskUsedPercent = (data.disk_used / data.disk_total) * 100;
+                    diskChart.data.datasets[0].data = [diskUsedPercent, 100 - diskUsedPercent];
+                    diskChart.update();
+                })
+                .catch(error => console.error('Error fetching data:', error));
         }
-      });
-      
-      var ctx1 = document.getElementById('diskChart').getContext('2d');
-      var diskChart = new Chart(ctx1, {
-        type: 'doughnut',
-        data: {
-          labels: ['Used', 'Free'],
-          datasets: [
-          {
-            label: 'Disk Usage',
-            data: [{{ disk_used|default:0 }}, {{ disk_free|default:0 }}],
-            backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)'],
-            borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
-            borderWidth: 1
-          }
-          ]
-        }
-      });
+
+        // Update every 5 seconds
+        setInterval(updateData, 5000);
     </script>
-  </body>
-  </html>
-  {% endblock %}
+</body>
+</html>
+
+{% endblock %}
