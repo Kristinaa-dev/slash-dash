@@ -1,0 +1,14 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns */
+  grid-template-rows: repeat(2, 200px); /* 2 rows, each 200px high */
+  gap: 20px; /* Space between graphs */
+}
+
+.graph {
+  background-color: #ececec;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
