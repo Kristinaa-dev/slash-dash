@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 import psutil
 import platform
+import docker
 
 def get_services_data():
     services = []
@@ -69,3 +70,37 @@ def index(request):
 def system_data(request):
     data = get_system_data()
     return JsonResponse(data)
+
+
+# DOCKER CONTAINER MANAGEMENT
+
+
+# Initialize Docker client
+client = docker.from_env()
+
+def get_docker_containers():
+    containers = []
+    try:
+        for container in client.containers.list(all=True):
+            containers.append({
+                'id': container.short_id,
+                'name': container.name,
+                'status': container.status,
+                'ports': container.ports,
+                'image': container.image.tags,
+            })
+    except Exception as e:
+        pass
+    return containers
+
+def docker_monitor_view(request):
+    containers = get_docker_containers()
+    context = {
+        'containers': containers
+    }
+    return render(request, 'dashboard/docker_monitor.html', context)
+
+def container_logs_view(request, container_id):
+    container = client.containers.get(container_id)
+    logs = container.logs().decode()
+    return JsonResponse({'logs': logs})

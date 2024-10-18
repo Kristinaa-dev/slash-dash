@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Docker Containers</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Ports</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for container in containers %}
+            <tr>
+                <td>{{ container.name }}</td>
+                <td>{{ container.status }}</td>
+                <td>{{ container.ports }}</td>
+                <td>
+                    <a href="{% url 'docker_logs' container.id %}" class="btn btn-info">View Logs</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

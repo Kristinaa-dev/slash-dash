@@ -13,8 +13,9 @@
             {% block side_panel %}
                 <ul>
                     <li><a href="#">Home</a></li>
-                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="{% url 'index' %}">Dashboard</a></li>
                     <li><a href="#">Settings</a></li>
+                    <li><a href="{% url 'docker_monitor' %}">Docker</a></li>
                 </ul>
             {% endblock %}
         </div>
