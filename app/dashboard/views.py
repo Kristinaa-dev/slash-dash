@@ -75,32 +75,81 @@ def system_data(request):
 # DOCKER CONTAINER MANAGEMENT
 
 
-# Initialize Docker client
+# Create a Docker client
 client = docker.from_env()
 
-def get_docker_containers():
-    containers = []
+def docker_monitor(request):
+    # Get all running containers
+    containers = client.containers.list(all=True)
+
+    # Collect data for each container
+    container_data = []
+    for container in containers:
+        stats = container.stats(stream=False)
+        
+        container_info = {
+            'name': container.name,
+            'status': container.status,
+            'cpu_usage': calculate_cpu_usage(stats),
+            'memory_usage': calculate_memory_usage(stats),
+            'network_io': calculate_network_io(stats),
+            'disk_io': calculate_disk_io(stats),
+            'restart_count': container.attrs['RestartCount'],
+            'ports': container.attrs['NetworkSettings']['Ports'],
+            'logs': container.logs(tail=10).decode('utf-8'),
+            'uptime': container.attrs['State']['StartedAt'],
+            'health_status': container.attrs['State'].get('Health', {}).get('Status', 'N/A')
+        }
+        container_data.append(container_info)
+
+    # Send the container data to the template
+    return render(request, 'dashboard/docker_monitor.html', {'containers': container_data})
+
+# Helper function for calculating CPU usage
+def calculate_cpu_usage(stats):
     try:
-        for container in client.containers.list(all=True):
-            containers.append({
-                'id': container.short_id,
-                'name': container.name,
-                'status': container.status,
-                'ports': container.ports,
-                'image': container.image.tags,
-            })
-    except Exception as e:
-        pass
-    return containers
+        cpu_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - stats['precpu_stats']['cpu_usage']['total_usage']
+        system_delta = stats['cpu_stats']['system_cpu_usage'] - stats['precpu_stats']['system_cpu_usage']
+        cpu_usage = (cpu_delta / system_delta) * len(stats['cpu_stats']['cpu_usage']['percpu_usage']) * 100.0
+        return round(cpu_usage, 2)
+    except (KeyError, ZeroDivisionError):
+        return 'N/A'
 
-def docker_monitor_view(request):
-    containers = get_docker_containers()
-    context = {
-        'containers': containers
-    }
-    return render(request, 'dashboard/docker_monitor.html', context)
+# Helper function for calculating memory usage
+def calculate_memory_usage(stats):
+    try:
+        mem_usage = stats['memory_stats']['usage']
+        mem_limit = stats['memory_stats']['limit']
+        return round((mem_usage / mem_limit) * 100.0, 2)
+    except KeyError:
+        return 'N/A'
 
-def container_logs_view(request, container_id):
-    container = client.containers.get(container_id)
-    logs = container.logs().decode()
-    return JsonResponse({'logs': logs})
+# Helper function for calculating network I/O
+def calculate_network_io(stats):
+    try:
+        networks = stats.get('networks', {})
+        io_data = {}
+        for interface, data in networks.items():
+            io_data[interface] = {
+                'rx_bytes': data['rx_bytes'],
+                'tx_bytes': data['tx_bytes']
+            }
+        return io_data
+    except KeyError:
+        return {}
+
+# Helper function for calculating disk I/O
+# Helper function for calculating disk I/O
+def calculate_disk_io(stats):
+    try:
+        # Safely extract the disk IO data, ensuring it's not None
+        disk_io_data = stats.get('blkio_stats', {}).get('io_service_bytes_recursive', [])
+        if disk_io_data is None:
+            return {}
+
+        io_data = {}
+        for item in disk_io_data:
+            io_data[item.get('op', 'Unknown')] = item.get('value', 0)
+        return io_data
+    except KeyError:
+        return {}

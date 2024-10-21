@@ -1,15 +1,31 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="container">
-    <h2>Docker Containers</h2>
-    <table class="table">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table, th, td { border: 1px solid #ccc; padding: 10px; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h1>Docker Container Monitor</h1>
+    <table>
         <thead>
             <tr>
-                <th>Name</th>
+                <th>Container Name</th>
                 <th>Status</th>
+                <th>CPU Usage (%)</th>
+                <th>Memory Usage (%)</th>
+                <th>Network IO (Rx/Tx Bytes)</th>
+                <th>Restart Count</th>
                 <th>Ports</th>
-                <th>Actions</th>
+                <th>Logs</th>
+                <th>Uptime</th>
+                <th>Health Status</th>
             </tr>
         </thead>
         <tbody>
@@ -17,14 +33,26 @@
             <tr>
                 <td>{{ container.name }}</td>
                 <td>{{ container.status }}</td>
-                <td>{{ container.ports }}</td>
+                <td>{{ container.cpu_usage }}%</td>
+                <td>{{ container.memory_usage }}%</td>
                 <td>
-                    <a href="{% url 'docker_logs' container.id %}" class="btn btn-info">View Logs</a>
+                    {% for interface, io in container.network_io.items %}
+                        {{ interface }}: Rx {{ io.rx_bytes }} bytes, Tx {{ io.tx_bytes }} bytes <br>
+                    {% endfor %}
                 </td>
+                <td>{{ container.restart_count }}</td>
+                <td>
+                    {% for port, config in container.ports.items %}
+                        {{ port }}: {{ config.0.HostIp }}:{{ config.0.HostPort }} <br>
+                    {% endfor %}
+                </td>
+                <td><pre>{{ container.logs }}</pre></td>
+                <td>{{ container.uptime }}</td>
+                <td>{{ container.health_status }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</div>
-{% endblock %}
+</body>
+</html>
 
