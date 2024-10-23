@@ -1,30 +1,9 @@
 :root {
   /* Background */
-  --background-dark: #1C1C1E;
-  --background-slate-black: #111111;
+  --background-dark: #0c0d11;
+  --background-dark-secondary: #15161a;
 
-  /* Accent Colors */
-  --accent-neon-cyan: #00FFFF;
-  --accent-electric-blue: #1E90FF;
-  --accent-ultramarine: #3A80E9;
-  --accent-lime-green: #32CD32;
-  --accent-neon-green: #39FF14;
-  --accent-magenta: #FF00FF;
-  --accent-fuchsia: #FF77FF;
-
-  /* Gradient Colors */
-  --gradient-cyan-ultramarine-start: #00FFFF;
-  --gradient-cyan-ultramarine-end: #3A80E9;
-  --gradient-blue-violet-start: #1E90FF;
-  --gradient-blue-violet-end: #EE82EE;
-
-  /* Complementary Highlights */
-  --highlight-silver-gray: #BFC9CA;
-  --highlight-bright-yellow: #FFFF00;
 }
-
-
-
 
 body {
     font-family: Arial, sans-serif;
@@ -47,7 +26,7 @@ h1 {
 }
 
 .grid-item {
-    background-color: #161616;
+    background-color: var(--background-dark);
     padding: 20px;
     border-radius: 8px;
     text-align: center;
