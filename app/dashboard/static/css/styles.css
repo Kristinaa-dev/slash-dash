@@ -1,8 +1,8 @@
 :root {
-  /* Background */
-  --background-dark: #0c0d11;
-  --background-dark-secondary: #15161a;
-
+    /* Background */
+    --background-dark: #0c0d11;
+    --background-dark-secondary: #15161a;
+    
 }
 
 body {
@@ -10,7 +10,6 @@ body {
     margin: 0px;
     padding: 0px;
 }
-
 h1 {
     text-align: center;
     margin-top: 20px;
@@ -26,7 +25,7 @@ h1 {
 }
 
 .grid-item {
-    background-color: var(--background-dark);
+    background-color: var(--background-dark-secondary);
     padding: 20px;
     border-radius: 8px;
     text-align: center;
