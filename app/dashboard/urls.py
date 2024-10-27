@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('system-data/', views.system_data, name='system_data'),
     path('docker-monitor/', docker_monitor, name='docker_monitor'),
+    path("terminal/", views.terminal_view, name="terminal"),
 
 ]
 

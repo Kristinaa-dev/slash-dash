@@ -5,6 +5,10 @@ import psutil
 import platform
 import docker
 
+
+def terminal_view(request):
+    return render(request, "dashboard/terminal.html")
+
 def get_services_data():
     services = []
 
@@ -96,7 +100,6 @@ def docker_monitor(request):
             'disk_io': calculate_disk_io(stats),
             'restart_count': container.attrs['RestartCount'],
             'ports': container.attrs['NetworkSettings']['Ports'],
-            'logs': container.logs(tail=10).decode('utf-8'),
             'uptime': container.attrs['State']['StartedAt'],
             'health_status': container.attrs['State'].get('Health', {}).get('Status', 'N/A')
         }

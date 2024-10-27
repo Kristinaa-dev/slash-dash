@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'dashboard',
+    'grafana_dashboard',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +70,8 @@ TEMPLATES = [
     },
 ]
 
+
+ASGI_APPLICATION = 'app.asgi.application'
 WSGI_APPLICATION = 'app.wsgi.application'
 
 

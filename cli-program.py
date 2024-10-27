@@ -1,34 +1,43 @@
-import psutil
-import os
+import docker
+import time
 
-import subprocess
+# Initialize the Docker client
+client = docker.from_env()
 
-print(subprocess.run(["ls", "-l"]))
-# can also use the subprocess call function
-# probably faster then the os module and also safer
+# Function to create and start a container
+def create_container(name, command):
+    print(f"Creating container: {name}")
+    container = client.containers.run(
+        "alpine",                # Using Alpine Linux for simplicity
+        command=command,         # Command to run inside the container
+        name=name,               # Container name
+        detach=True,             # Run container in detached mode
+        auto_remove=True,        # Automatically remove the container when stopped
+        tty=True                 # Allocate a pseudo-TTY for the container
+    )
+    return container
 
+# Create 5 containers with low CPU usage
+containers = []
+for i in range(5):
+    container_name = f"test_container_{i+1}"
+    # Simple command to generate CPU load and logs
+    command = "sh -c 'while true; do echo \"Log from container $HOSTNAME\"; sleep 2; done'"
+    container = create_container(container_name, command)
+    containers.append(container)
 
-def cpu_percent(t):
-    return psutil.cpu_percent(interval=t)
-def memory_percent():
-    return psutil.virtual_memory().percent
-def disk_percent():
-    return psutil.disk_usage('/').percent
+# Print the running containers
+for container in containers:
+    print(f"Container {container.name} is running with ID {container.short_id}")
 
+# Let the containers run for a while to generate logs and CPU usage
+try:
+    print("Containers are running. Press Ctrl+C to stop...")
+    while True:
+        time.sleep(10)
+except KeyboardInterrupt:
+    print("\nStopping containers...")
+    for container in containers:
+        container.stop()
 
-
-t = 0.1
-
-def alert(what, value):
-    print(f"Alert: {what} is {value}")
-
-
-for i in range(20):
-    if cpu_percent(t) > 90:
-        alert("CPU", cpu_percent(t))
-    if memory_percent() > 90:
-        alert("Memory", memory_percent())
-    print(cpu_percent(t), memory_percent())
-
-os.system("ls -l")
-print(os.system("ls -l"))        
+print("All containers stopped.")

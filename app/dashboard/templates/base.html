@@ -12,17 +12,17 @@
 <body>
     <div class="container">
         <!-- Sidebar -->
-        <div class="side-panel" id="sidebar">
-            <div class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+        <div class="side-panel collapsed" id="sidebar">
+            <div class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars icon"></i></div>
             <ul>
-                <li><a href="#"><i class="fas fa-home icon"></i><span class="sidebar-text">Home</span></a></li>
-                <li><a href="{% url 'index' %}"><i class="fas fa-chart-line icon"></i><span class="sidebar-text">Dashboard</span></a></li>
-                <li><a href="#"><i class="fas fa-cog icon"></i><span class="sidebar-text">Settings</span></a></li>
-                <li><a href="{% url 'docker_monitor' %}"><i class="fab fa-docker icon"></i><span class="sidebar-text">Docker</span></a></li>
+                <li><a href="#"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
+                <li><a href="{% url 'index' %}"><i class="fas fa-chart-line icon"></i><span class="text">Analytics</span></a></li>
+                <li><a href="#"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
+                <li><a href="{% url 'docker_monitor' %}"><i class="fab fa-docker icon"></i><span class="text">Docker</span></a></li>
             </ul>
             <!-- Logout at the bottom -->
             <div class="logout">
-                <a href="#"><i class="fas fa-sign-out-alt icon"></i><span class="sidebar-text">Logout</span></a>
+                <a href="#"><i class="fas fa-sign-out-alt icon"></i><span class="text">Logout</span></a>
             </div>
         </div>
 
@@ -33,5 +33,12 @@
             {% endblock %}
         </div>
     </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('expanded');
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+    </script>
 </body>
 </html>
