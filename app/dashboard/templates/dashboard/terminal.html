@@ -1,17 +1,23 @@
-{% load static %}
+{% extends 'base.html' %}{}{% load static %}
+{% block title %}
+  Terminal
+{% endblock %}
+
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Web Terminal</title>
-    <!-- Updated links for xterm.js and xterm.css -->
+    <!-- CDN xterm -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.11.0/css/xterm.css">
     <script src="https://cdn.jsdelivr.net/npm/xterm@4.11.0/lib/xterm.js"></script>
-    <!-- Your custom script for WebSocket connection -->
+
     <script src="{% static 'js/terminal.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
     <div id="terminal" style="height: 100%; width: 100%;"></div>
 </body>
 </html>
-
+{% endblock %}
