@@ -32,6 +32,7 @@
     <script>
         // Data from Django context
         var data = {{ data|safe }};
+        console.log(data);
         var maxDataPoints = 10 * 60; // 10 minutes worth of data if updated every second
 
         // Initialize the charts
@@ -58,9 +59,18 @@
                     datasets: [{
                         label: label,
                         data: dataValues,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        fill: false,
+                        // borderColor: 'rgba(75, 192, 192, 1)',
+                        //fill: false,
                         tension: 0.1,
+                        backgroundColor: 'rgba(36, 164, 167, 0.1)', // Light color fill
+                        borderColor: 'rgba(36, 164, 167, 1)',     // Border color
+                        borderWidth: 2,
+                        fill: true,   // Fills the area under the line
+                        pointRadius: 0 // Removes the dot
+
+
+
+
                     }]
                 },
                 options: {
