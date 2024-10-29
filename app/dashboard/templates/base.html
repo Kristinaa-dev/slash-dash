@@ -16,8 +16,9 @@
             <div class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars icon"></i></div>
             <ul>
                 <li><a href="#"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
-                <li><a href="{% url 'index' %}"><i class="fas fa-chart-line icon"></i><span class="text">Analytics</span></a></li>
+                <li><a href="{% url 'dashboard' %}"><i class="fas fa-chart-line icon"></i><span class="text">Analytics</span></a></li>
                 <li><a href="{% url 'docker_monitor' %}"><i class="fab fa-docker icon"></i><span class="text">Docker</span></a></li>
+                <li><a href="{% url 'terminal' %}"><i class="fas fa-terminal icon"></i><span class="text">Terminal</span></a></li>
                 <li><a href="#"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
             </ul>
             <!-- Logout at the bottom -->
