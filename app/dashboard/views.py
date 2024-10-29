@@ -1,9 +1,13 @@
 # views.py
 from django.shortcuts import render
 from django.http import JsonResponse
+from .models import TimeSeriesData, MetricType
+from django.utils import timezone
 import psutil
 import platform
 import docker
+import datetime
+
 
 
 def terminal_view(request):
@@ -47,34 +51,6 @@ def get_services_data():
             pass
 
     return services
-
-def get_system_data():
-    cpu_usage = psutil.cpu_percent(interval=1)
-    memory_info = psutil.virtual_memory()
-    disk_info = psutil.disk_usage('/')
-
-    services = get_services_data()
-
-    return {
-        'cpu_usage': cpu_usage,
-        'memory_info': memory_info.total,
-        'memory_used': memory_info.used,
-        'memory_free': memory_info.free,
-        'memory_percent': memory_info.percent,
-        'disk_total': disk_info.total,
-        'disk_used': disk_info.used,
-        'disk_free': disk_info.free,
-        'services': services,  # Include services data
-    }
-
-def index(request):
-    context = get_system_data()
-    return render(request, 'dashboard/index.html', context)
-
-def system_data(request):
-    data = get_system_data()
-    return JsonResponse(data)
-
 
 # DOCKER CONTAINER MANAGEMENT
 
@@ -156,3 +132,49 @@ def calculate_disk_io(stats):
         return io_data
     except KeyError:
         return {}
+
+# DB TEST
+def dashboard(request):
+    # Define time range (last 10 minutes)
+    end_time = timezone.now()
+    start_time = end_time - datetime.timedelta(minutes=10)
+
+    # Get metric types
+    metrics = MetricType.objects.all()
+
+    data = {}
+    for metric in metrics:
+        # Retrieve data points for each metric within the last 10 minutes
+        data_points = TimeSeriesData.objects.filter(
+            metric_type=metric,
+            timestamp__range=(start_time, end_time)
+        ).order_by('timestamp')
+
+        # Prepare data for Chart.js
+        data[metric.name] = {
+            'timestamps': [dp.timestamp.strftime("%H:%M:%S") for dp in data_points],
+            'values': [dp.value for dp in data_points],
+            'unit': metric.unit,
+        }
+
+    context = {'data': data}
+    return render(request, 'dashboard/index.html', context)
+
+def latest_data(request):
+    metrics = MetricType.objects.all()
+
+    data = {}
+    for metric in metrics:
+        # Get the latest data point for each metric
+        latest_data_point = TimeSeriesData.objects.filter(
+            metric_type=metric
+        ).order_by('-timestamp').first()
+
+        if latest_data_point:
+            data[metric.name] = {
+                'timestamp': latest_data_point.timestamp.strftime("%H:%M:%S"),
+                'value': latest_data_point.value,
+                'unit': metric.unit,
+            }
+
+    return JsonResponse(data)
