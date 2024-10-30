@@ -1,8 +1,11 @@
 # views.py
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import TimeSeriesData, MetricType
 from django.utils import timezone
+from .models import TimeSeriesData, MetricType, LogEntry
+from collections import defaultdict
+from django.db.models.functions import TruncDate
+from django.db.models import DateField
 import psutil
 import platform
 import docker
@@ -31,7 +34,6 @@ def get_services_data():
                     'description': service_info.get('description', ''),
                 })
         except Exception as e:
-            # Handle exception if needed
             pass
     else:
         # For Unix-like systems, list running processes as services
@@ -47,7 +49,6 @@ def get_services_data():
                     'description': '',
                 })
         except Exception as e:
-            # Handle exception if needed
             pass
 
     return services
@@ -118,7 +119,6 @@ def calculate_network_io(stats):
         return {}
 
 # Helper function for calculating disk I/O
-# Helper function for calculating disk I/O
 def calculate_disk_io(stats):
     try:
         # Safely extract the disk IO data, ensuring it's not None
@@ -178,3 +178,11 @@ def latest_data(request):
             }
 
     return JsonResponse(data)
+
+# LOGS
+def logs(request):
+    # Get the logs, truncated by date
+    logs = LogEntry.objects.all()[:10]
+    
+    context = {'logs': logs}
+    return render(request, 'dashboard/logs.html', context)

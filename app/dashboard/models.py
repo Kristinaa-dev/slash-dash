@@ -14,3 +14,16 @@ class TimeSeriesData(models.Model):
 
     def __str__(self):
         return f"{self.metric_type.name} at {self.timestamp}"
+    
+    
+class LogEntry(models.Model):
+    timestamp = models.DateTimeField()
+    service = models.CharField(max_length=255)
+    priority = models.CharField(max_length=50)
+    message = models.TextField()
+
+    class Meta:
+        ordering = ['-timestamp']  # Latest logs first
+
+    def __str__(self):
+        return f"[{self.timestamp}] {self.service}: {self.message[:50]}"

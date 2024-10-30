@@ -9,5 +9,6 @@ urlpatterns = [
     path("terminal/", views.terminal_view, name="terminal"),
     # path('test', views.dashboard, name='dashboard'),
     path('latest-data/', views.latest_data, name='latest_data'),
+    path('logs/', views.logs, name='logs'),
 ]
 
