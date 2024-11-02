@@ -4,44 +4,45 @@
 {% endblock %}
 
 {% block content %}
+{% load static %}
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recent System Logs</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-        }
-        tr:nth-child(even){background-color: black;}
-        th {
-            background-color: #333;
-            color: white;
-        }
-    </style>
-	<link rel="stylesheet" href="{% static 'css/styles.css' %}">
-	<link rel="stylesheet" href="{% static 'css/logs.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/logs.css' %}">
 </head>
 <body>
-    <h2>Recent System Logs</h2>
-    <table>
-        <tr>
-            <th>Timestamp</th>
-            <th>Service</th>
-            <th>Priority</th>
-            <th>Message</th>
-        </tr>
-        {% for log in logs %}
-        <tr>
-            <td>{{ log.timestamp }}</td>
-            <td>{{ log.service }}</td>
-            <td>{{ log.priority }}</td>
-            <td>{{ log.message }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="main-content">
+
+        <h2 class="title">Dashboard > Recent Logs </h2>
+        <div class="display">
+
+            {% for date, logs in grouped_logs.items %}
+                <h3 class="date">{{ date }}</h3>
+
+                <table class="log-table">
+                    <tr>
+                        <th>Time</th>
+                        <th>Priority</th>
+                        <th>Message</th>
+                        <th>service</th>
+        
+                    </tr>
+                    {% for log in logs %}
+                        <tr>
+                            <td>{{ log.timestamp.time }}</td>
+                            <td>{{ log.priority }}</td>
+                            <td>{{ log.message }}</td>
+                            <td>{{ log.service }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <span class="divider"></span>
+            {% endfor %}
+        </div>
+    </div>
+
 </body>
 </html>
 {% endblock %}

@@ -5,7 +5,8 @@ from django.utils import timezone
 from .models import TimeSeriesData, MetricType, LogEntry
 from collections import defaultdict
 from django.db.models.functions import TruncDate
-from django.db.models import DateField
+from django.db.models import DateField, Max, Min
+from itertools import groupby
 import psutil
 import platform
 import docker
@@ -180,9 +181,32 @@ def latest_data(request):
     return JsonResponse(data)
 
 # LOGS
+# def logs(request):
+#     # Get the logs, truncated by date
+#     logs = LogEntry.objects.all()[:10]
+#     context = {'logs': logs}
+#     print(context)
+#     return render(request, 'dashboard/logs.html', context)
+
+
+
 def logs(request):
-    # Get the logs, truncated by date
-    logs = LogEntry.objects.all()[:10]
+    # Find the highest priority level among the logs
+    lowest_priority = LogEntry.objects.all().aggregate(Min('priority'))['priority__min']
     
-    context = {'logs': logs}
-    return render(request, 'dashboard/logs.html', context)
+    if lowest_priority is not None:
+        # Filter logs with only the lowest priority level and order them by date
+        logs = LogEntry.objects.filter(priority=lowest_priority).order_by('-timestamp')
+        
+        # Group logs by date
+        grouped_logs = {}
+        for log in logs:
+            date_str = log.timestamp.date()
+            if date_str not in grouped_logs:
+                grouped_logs[date_str] = []
+            grouped_logs[date_str].append(log)
+    else:
+        # If there are no logs, set grouped_logs to an empty dictionary
+        grouped_logs = {}
+    
+    return render(request, 'dashboard/logs.html', {'grouped_logs': grouped_logs})

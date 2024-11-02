@@ -1,0 +1,27 @@
+:root {
+    /* Background */
+    --background-dark: #0c0d11;
+    --background-dark-secondary: #15161a;
+    
+}
+
+.date{
+	margin: 15px;
+}
+.log-table{
+	margin-left: 30px;
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+}
+.display{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	background-color: var(--background-dark-secondary);
+	margin-top: 10px;
+	border-radius: 5px;
+}
+.divider{
+	background-color: var(--background-dark);
+	height: 10px;
+}
