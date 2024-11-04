@@ -1,0 +1,23 @@
+{% extends 'base.html' %}{% load static %}
+
+{% block content %}
+<div class="login-container">
+    <h2>Login</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <p class="error">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div>
+            <label>
+                <input type="checkbox" name="remember_me" id="remember_me">
+                Stay logged in
+            </label>
+        </div>
+        <button type="submit">Login</button>
+    </form>
+</div>
+{% endblock %}
