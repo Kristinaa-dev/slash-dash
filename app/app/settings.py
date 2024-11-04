@@ -49,6 +49,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'app.middleware.LoginRequiredMiddleware',
+    # 'django.contrib.auth.middleware.LoginRequiredMiddlewares',
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -73,6 +75,14 @@ TEMPLATES = [
 ASGI_APPLICATION = 'app.asgi.application'
 WSGI_APPLICATION = 'app.wsgi.application'
 
+# AUTH/LOGIN
+
+LOGIN_URL = '/login/'  # Redirect users to login if they're not authenticated
+LOGIN_REDIRECT_URL = '/'  # Redirect after successful login
+LOGOUT_REDIRECT_URL = '/login/'  # Redirect after logging out
+# Session settings for "Stay Logged In" functionality
+SESSION_COOKIE_AGE = 1209600  # Two weeks in seconds
+SESSION_SAVE_EVERY_REQUEST = True  # Extend session with every request
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
