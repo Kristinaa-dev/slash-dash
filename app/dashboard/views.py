@@ -1,5 +1,5 @@
 # views.py
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.utils import timezone
 from .models import TimeSeriesData, MetricType, LogEntry
@@ -7,13 +7,23 @@ from collections import defaultdict
 from django.db.models.functions import TruncDate
 from django.db.models import DateField, Max, Min
 from itertools import groupby
+from django.contrib.auth import login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
 import psutil
 import platform
 import docker
 import datetime
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 
+def is_admin(user):
+    return user.is_superuser
 
+
+@login_required
+@user_passes_test(is_admin)
 def terminal_view(request):
     return render(request, "dashboard/terminal.html")
 
@@ -135,6 +145,7 @@ def calculate_disk_io(stats):
         return {}
 
 # DB TEST
+@login_required
 def dashboard(request):
     # Define time range (last 10 minutes)
     end_time = timezone.now()
@@ -210,3 +221,35 @@ def logs(request):
         grouped_logs = {}
     
     return render(request, 'dashboard/logs.html', {'grouped_logs': grouped_logs})
+
+
+
+
+# Login 
+
+def custom_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            # "Stay Logged In" functionality
+            if not request.POST.get('remember_me'):
+                request.session.set_expiry(0)  # Session expires on browser close
+            else:
+                request.session.set_expiry(1209600)  # 2 weeks
+
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'authentication/login.html', {'form': form})
+
+# LOGOUT
+# views.py
+
+def custom_logout(request):
+    logout(request)
+    return redirect('login')
