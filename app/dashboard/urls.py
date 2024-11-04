@@ -10,5 +10,8 @@ urlpatterns = [
     # path('test', views.dashboard, name='dashboard'),
     path('latest-data/', views.latest_data, name='latest_data'),
     path('logs/', views.logs, name='logs'),
+    
+    path('login/', views.custom_login, name='login'),
+    path('logout/', views.custom_logout, name='logout'),
 ]
 
