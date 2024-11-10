@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from celery import Celery
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,6 +23,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-5h5t!a&ffgr&(4hpi^bv-6jpg1qfwl1x6%p!(hrf3-)#+j+pte'
+
+# Celery stuff
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings")
+celery_app = Celery("app")
+celery_app.config_from_object("django.conf:settings", namespace="CELERY")
+celery_app.autodiscover_tasks()
+
+
+# Schedule a Bear
+# app/settings.py
+
+CELERY_BEAT_SCHEDULE = {
+    "run-collect-metrics-every-minute": {
+        "task": "dashboard.tasks.run_collect_metrics",
+        "schedule": 60.0,  # Run every 60 seconds
+    },
+}
+
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'dashboard',
+    'app',
 ]
 
 MIDDLEWARE = [
