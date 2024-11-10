@@ -30,37 +30,20 @@ def terminal_view(request):
 def get_services_data():
     services = []
 
-    if platform.system() == 'Windows':
-        # For Windows systems
-        try:
-            for service in psutil.win_service_iter():
-                service_info = service.as_dict()
-                services.append({
-                    'name': service_info['name'],
-                    'display_name': service_info['display_name'],
-                    'status': service_info['status'],
-                    'pid': service_info.get('pid', None),
-                    'username': service_info.get('username', ''),
-                    'binpath': service_info.get('binpath', ''),
-                    'description': service_info.get('description', ''),
-                })
-        except Exception as e:
-            pass
-    else:
-        # For Unix-like systems, list running processes as services
-        try:
-            for proc in psutil.process_iter(['pid', 'name', 'username', 'status']):
-                services.append({
-                    'name': proc.info['name'],
-                    'display_name': proc.info['name'],
-                    'status': proc.info['status'],
-                    'pid': proc.info['pid'],
-                    'username': proc.info['username'],
-                    'binpath': '',
-                    'description': '',
-                })
-        except Exception as e:
-            pass
+    # For Unix-like systems, list running processes as services
+    try:
+        for proc in psutil.process_iter(['pid', 'name', 'username', 'status']):
+            services.append({
+                'name': proc.info['name'],
+                'display_name': proc.info['name'],
+                'status': proc.info['status'],
+                'pid': proc.info['pid'],
+                'username': proc.info['username'],
+                'binpath': '',
+                'description': '',
+            })
+    except Exception as e:
+        pass
 
     return services
 
@@ -192,14 +175,6 @@ def latest_data(request):
     return JsonResponse(data)
 
 # LOGS
-# def logs(request):
-#     # Get the logs, truncated by date
-#     logs = LogEntry.objects.all()[:10]
-#     context = {'logs': logs}
-#     print(context)
-#     return render(request, 'dashboard/logs.html', context)
-
-
 
 def logs(request):
     # Find the highest priority level among the logs
@@ -242,6 +217,7 @@ def custom_login(request):
 
             return redirect('dashboard')
         else:
+            form.errors.clear()
             messages.error(request, 'Invalid username or password.')
     else:
         form = AuthenticationForm()
