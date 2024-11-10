@@ -1,0 +1,113 @@
+:root {
+    --background-dark: #0c0d11;
+    --background-dark-secondary: rgba(21, 22, 26, 0.85);
+    --input-bg: #22252a;
+    --input-border: #4a4e57;
+    --input-focus: #A566C7; /* Matches the purple highlight in the background */
+    --button-bg: #3A8DD4;    /* Deep teal/blue for button */
+    --button-hover-bg: #5A9DE4; /* Lighter blue for hover effect */
+    --text-color: #E1E2E7;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    background-color: var(--background-dark);
+}
+
+.login-bg {
+    background-image: url('/static/images/login_background_no_grad.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container {
+    background-color: var(--background-dark-secondary);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form input[type="text"],
+form input[type="password"]{
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+	width: 100%;
+    transition: border-color 0.3s;
+}
+form input[type="checkbox"] {
+	margin-right: 0.5rem;
+}
+
+form input[type="text"]:focus,
+form input[type="password"]:focus {
+    border-color: var(--input-focus);
+    outline: none;
+}
+
+form label {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+form label input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+button[type="submit"] {
+    background-color: var(--button-bg);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 0.8rem;
+	font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: var(--button-hover-bg);
+}
+
+.error {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
