@@ -10,23 +10,26 @@
     <title>System Usage Dashboard</title>
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/graphs.css' %}">
     <title>System Monitoring Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h2 class="title">Dashboard</h2>
+    <div class="graphs-container">
+        <div class="graph">
+            <canvas id="cpuChart"></canvas>
+        </div>
+        <div class="graph">
+            <canvas id="memoryChart"></canvas>
+        </div>
+        <div class="graph">
+            <canvas id="networkChart"></canvas>
+        </div>
+        <div class="graph">
+            <canvas id="diskChart"></canvas>
+        </div>
 
-    <div style="width: 600px;">
-        <canvas id="cpuChart"></canvas>
-    </div>
-    <div style="width: 600px;">
-        <canvas id="memoryChart"></canvas>
-    </div>
-    <div style="width: 600px;">
-        <canvas id="networkChart"></canvas>
-    </div>
-    <div style="width: 600px;">
-        <canvas id="diskChart"></canvas>
     </div>
 
     <script>
@@ -43,10 +46,10 @@
             'memoryChart', 'Memory Usage (%)', data.memory_usage.timestamps, data.memory_usage.values, 'Memory Usage (%)'
         );
         var networkChart = createChartBytes(
-            'networkChart', 'Network I/O (bytes)', data.network_io.timestamps, data.network_io.values, 'Bytes'
+            'networkChart', 'Network I/O (MB)', data.network_io.timestamps, data.network_io.values, 'Bytes'
         );
         var diskChart = createChartBytes(
-            'diskChart', 'Disk I/O (bytes)', data.disk_io.timestamps, data.disk_io.values, 'Bytes'
+            'diskChart', 'Disk I/O (MB)', data.disk_io.timestamps, data.disk_io.values, 'Bytes'
         );
 
         // Function to create a chart for percentage data
@@ -70,9 +73,13 @@
                     }]
                 },
                 options: {
+                    plugins: {
+                        title: { display: true, text: label },
+                        legend: { display: false }
+                    },
                     scales: {
                         x: { display: true, title: { display: true, text: 'Time' } },
-                        y: { beginAtZero: true, max: 100, title: { display: true, text: yLabel } },
+                        y: { title: { display: true, text: yLabel } },
                     }
                 }
             });
@@ -80,6 +87,7 @@
 
         // Function to create a chart for bytes data
         function createChartBytes(canvasId, label, dataLabels, dataValues, yLabel) {
+            let dataValuesInGB = dataValues.map(value => value / (1024 ** 3));
             var ctx = document.getElementById(canvasId).getContext('2d');
             return new Chart(ctx, {
                 type: 'line',
@@ -87,7 +95,7 @@
                     labels: dataLabels,
                     datasets: [{
                         label: label,
-                        data: dataValues,
+                        data: dataValuesInGB,
                         borderColor: 'rgba(75, 192, 192, 1)',
                         fill: false,
                         tension: 0.1,
@@ -95,8 +103,8 @@
                 },
                 options: {
                     scales: {
-                        x: { display: true, title: { display: true, text: 'Time' } },
-                        y: { display: true, title: { display: true, text: yLabel } },
+                        x: { display: true },
+                        y: { display: true },
                     }
                 }
             });

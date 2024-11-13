@@ -147,7 +147,7 @@ def dashboard(request):
 
         # Prepare data for Chart.js
         data[metric.name] = {
-            'timestamps': [dp.timestamp.strftime("%H:%M:%S") for dp in data_points],
+            'timestamps': [dp.timestamp.strftime("%H:%M") for dp in data_points],
             'values': [dp.value for dp in data_points],
             'unit': metric.unit,
         }
@@ -167,7 +167,7 @@ def latest_data(request):
 
         if latest_data_point:
             data[metric.name] = {
-                'timestamp': latest_data_point.timestamp.strftime("%H:%M:%S"),
+                'timestamp': latest_data_point.timestamp.strftime("%H:%M"),
                 'value': latest_data_point.value,
                 'unit': metric.unit,
             }

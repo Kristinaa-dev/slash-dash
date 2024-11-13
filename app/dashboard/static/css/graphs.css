@@ -1,0 +1,16 @@
+:root {
+    /* Background */
+    --background-dark: #0c0d11;
+    --background-dark-secondary: #15161a;
+    
+}
+
+.graph{
+	background-color: var(--background-dark-secondary);
+	width: 440px;
+}
+.graphs-container{
+	display: flex;
+	padding: 20px;
+	gap: 10px;
+}

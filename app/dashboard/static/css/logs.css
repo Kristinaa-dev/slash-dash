@@ -8,12 +8,13 @@
 .date{
 	margin: 15px;
 }
-.log-table{
+.log-table {
 	margin-left: 30px;
 	padding-bottom: 10px;
 	margin-bottom: 10px;
 }
-.display{
+
+.display {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -21,7 +22,32 @@
 	margin-top: 10px;
 	border-radius: 5px;
 }
-.divider{
+
+.divider {
 	background-color: var(--background-dark);
 	height: 10px;
 }
+
+.log-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center; /* Aligns items vertically */
+	justify-content: flex-start; /* Aligns items to the left */
+	gap: 20px; /* Adds spacing between items */
+}
+
+.log-time {
+	width: 5rem; /* Fixed width for time column */
+	text-align: right; /* Align text to the right within this width */
+}
+
+.log-msg {
+	flex: 1; /* Takes available space */
+	text-align: left;
+}
+
+.log-service {
+	width: 10rem; /* Adjust width as needed */
+	text-align: left;
+}
+

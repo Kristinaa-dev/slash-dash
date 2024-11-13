@@ -17,27 +17,18 @@
 
         <h2 class="title">Dashboard > Recent Logs </h2>
         <div class="display">
-
             {% for date, logs in grouped_logs.items %}
                 <h3 class="date">{{ date }}</h3>
-
-                <table class="log-table">
-                    <tr>
-                        <th>Time</th>
-                        <th>Priority</th>
-                        <th>Message</th>
-                        <th>service</th>
-        
-                    </tr>
+                <div class="log-table">
                     {% for log in logs %}
-                        <tr>
-                            <td>{{ log.timestamp.time }}</td>
-                            <td>{{ log.priority }}</td>
-                            <td>{{ log.message }}</td>
-                            <td>{{ log.service }}</td>
-                        </tr>
+                    <div class="log-row">
+                        <p class="log-time">{{ log.timestamp.time }}</p>
+
+                        <p class="log-msg">{{ log.message }}</p>
+                        <p class="log-service">{{ log.service }}</p> 
+                    </div>
                     {% endfor %}
-                </table>
+                    </div>
                 <span class="divider"></span>
             {% endfor %}
         </div>
