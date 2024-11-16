@@ -175,30 +175,67 @@ def latest_data(request):
     return JsonResponse(data)
 
 # LOGS
+from django.db.models import Min
+from django.shortcuts import render
+from datetime import datetime
+from .models import LogEntry
 
 def logs(request):
-    # Find the highest priority level among the logs
-    lowest_priority = LogEntry.objects.all().aggregate(Min('priority'))['priority__min']
-    
-    if lowest_priority is not None:
-        # Filter logs with only the lowest priority level and order them by date
-        logs = LogEntry.objects.filter(priority=lowest_priority).order_by('-timestamp')
-        
-        # Group logs by date
-        grouped_logs = {}
-        for log in logs:
-            date_str = log.timestamp.date()
-            if date_str not in grouped_logs:
-                grouped_logs[date_str] = []
-            grouped_logs[date_str].append(log)
-    else:
-        # If there are no logs, set grouped_logs to an empty dictionary
-        grouped_logs = {}
-    
-    return render(request, 'dashboard/logs.html', {'grouped_logs': grouped_logs})
+    # Retrieve filter parameters from the request
+    selected_priority = request.GET.get('priority', 'all')
+    selected_service = request.GET.get('service', 'all')
+    selected_date = request.GET.get('date', None)
+    search_term = request.GET.get('search', '')
 
+    # Start with all logs
+    logs = LogEntry.objects.all()
 
+    # Filter by priority if specified
+    if selected_priority != 'all':
+        logs = logs.filter(priority=selected_priority)
 
+    # Filter by service if specified
+    if selected_service != 'all':
+        logs = logs.filter(service=selected_service)
+
+    # Filter by date if specified
+    if selected_date:
+        try:
+            # Convert date string to date object
+            date_obj = datetime.strptime(selected_date, '%Y-%m-%d').date()
+            logs = logs.filter(timestamp__date=date_obj)
+        except ValueError:
+            # If date format is incorrect, ignore the date filter
+            pass
+
+    # Filter by search term in message or service
+    if search_term:
+        logs = logs.filter(
+            models.Q(message__icontains=search_term) |
+            models.Q(service__icontains=search_term)
+        )
+
+    # Group logs by date
+    grouped_logs = {}
+    for log in logs.order_by('-timestamp'):
+        date_str = log.timestamp.date()
+        if date_str not in grouped_logs:
+            grouped_logs[date_str] = []
+        grouped_logs[date_str].append(log)
+
+    # Get unique priorities and services for the filter dropdowns
+    unique_priorities = LogEntry.PRIORITY_CHOICES
+    unique_services = LogEntry.objects.values_list('service', flat=True).distinct()
+
+    return render(request, 'dashboard/logs.html', {
+        'grouped_logs': grouped_logs,
+        'unique_priorities': unique_priorities,
+        'unique_services': unique_services,
+        'selected_priority': selected_priority,
+        'selected_service': selected_service,
+        'selected_date': selected_date,
+        'search_term': search_term,
+    })
 
 # Login 
 

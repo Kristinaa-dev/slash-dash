@@ -1,53 +1,129 @@
 :root {
-    /* Background */
     --background-dark: #0c0d11;
     --background-dark-secondary: #15161a;
-    
+    --text-color: #ffffff;
+    --text-gray: #888;
+	--info-color: #3B82F6;
+	--warning-color: #EAB308;
+	--error-color: #EF4444;
+	--debug-color: #22C55E;
 }
 
-.date{
-	margin: 15px;
+body {
+    background-color: var(--background-dark);
+    color: var(--text-color);
+    font-family: Arial, sans-serif;
 }
-.log-table {
-	margin-left: 30px;
-	padding-bottom: 10px;
-	margin-bottom: 10px;
+
+.main-content {
+    padding: 20px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.control-item {
+    flex: 1;
+    min-width: 150px;
+}
+
+.date-picker,
+.log-level-select,
+.service-select,
+.search-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--text-gray);
+    background-color: var(--background-dark-secondary);
+    color: var(--text-color);
+    border-radius: 4px;
+}
+
+.filter-button {
+    padding: 8px 16px;
+    background-color: var(--background-dark-secondary);
+    color: var(--text-color);
+    border: 1px solid var(--text-gray);
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .display {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	background-color: var(--background-dark-secondary);
-	margin-top: 10px;
-	border-radius: 5px;
+    background-color: var(--background-dark-secondary);
+    border-radius: 5px;
+    padding: 10px;
 }
 
-.divider {
-	background-color: var(--background-dark);
-	height: 10px;
+.date {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.log-table {
+    margin: 0 10px;
 }
 
 .log-row {
-	display: flex;
-	flex-direction: row;
-	align-items: center; /* Aligns items vertically */
-	justify-content: flex-start; /* Aligns items to the left */
-	gap: 20px; /* Adds spacing between items */
+    display: flex;
+    gap: 15px;
+    padding: 8px;
+    margin-bottom: 5px;
+    background-color: var(--background-dark);
+    border-left: 4px solid;
+    border-radius: 4px;
 }
 
 .log-time {
-	width: 5rem; /* Fixed width for time column */
-	text-align: right; /* Align text to the right within this width */
+    width: 70px;
+    text-align: right;
 }
 
-.log-msg {
-	flex: 1; /* Takes available space */
-	text-align: left;
+.log-level {
+    width: 80px;
+    text-align: center;
+    font-weight: bold;
 }
 
 .log-service {
-	width: 10rem; /* Adjust width as needed */
-	text-align: left;
+    width: 150px;
+    text-align: left;
 }
 
+.log-msg {
+    flex: 1;
+    text-align: left;
+}
+
+/* Apply colors based on log priority */
+.log-row[data-level="INFO"] {
+    border-left-color: var(--info-color);
+}
+
+.log-row[data-level="WARNING"] {
+    border-left-color: var(--warning-color);
+}
+
+.log-row[data-level="ERROR"] {
+    border-left-color: var(--error-color);
+}
+
+.log-row[data-level="DEBUG"] {
+    border-left-color: var(--debug-color);
+}
+
+.divider {
+    height: 10px;
+    background-color: var(--background-dark);
+    margin: 20px 0;
+}

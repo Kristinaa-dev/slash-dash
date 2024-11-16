@@ -1,39 +1,76 @@
-{% extends 'base.html' %}{}{% load static %}
+{% extends 'base.html' %}
+{% load static %}
+
 {% block title %}
   System Logs
 {% endblock %}
 
 {% block content %}
-{% load static %}
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recent System Logs</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/logs.css' %}">
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/logs.css' %}">
 </head>
 <body>
-    <div class="main-content">
+<div class="main-content">
+    <h2 class="title">Dashboard > System Logs</h2>
 
-        <h2 class="title">Dashboard > Recent Logs </h2>
-        <div class="display">
-            {% for date, logs in grouped_logs.items %}
-                <h3 class="date">{{ date }}</h3>
-                <div class="log-table">
-                    {% for log in logs %}
-                    <div class="log-row">
-                        <p class="log-time">{{ log.timestamp.time }}</p>
+    <!-- Filter Form -->
+    <form method="get" action="">
+        <div class="controls">
+            <!-- Date Picker -->
+            <div class="control-item">
+                <input type="date" name="date" value="{{ selected_date }}" class="date-picker" />
+            </div>
 
-                        <p class="log-msg">{{ log.message }}</p>
-                        <p class="log-service">{{ log.service }}</p> 
-                    </div>
+            <!-- Priority Filter -->
+            <div class="control-item">
+                <select name="priority" class="log-level-select">
+                    <option value="all">All Levels</option>
+                    {% for key, value in unique_priorities %}
+                        <option value="{{ key }}" {% if selected_priority == key %}selected{% endif %}>{{ value }}</option>
                     {% endfor %}
-                    </div>
-                <span class="divider"></span>
-            {% endfor %}
-        </div>
-    </div>
+                </select>
+            </div>
 
+            <!-- Service Filter -->
+            <div class="control-item">
+                <select name="service" class="service-select">
+                    <option value="all">All Services</option>
+                    {% for service in unique_services %}
+                        <option value="{{ service }}" {% if selected_service == service %}selected{% endif %}>{{ service }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Search Input -->
+            <div class="control-item search-container">
+                <input type="text" name="search" value="{{ search_term }}" class="search-input" placeholder="Search logs..." />
+            </div>
+
+            <!-- Submit Button -->
+            <div class="control-item">
+                <button type="submit" class="filter-button">Filter</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Log Display -->
+    <div class="display">
+        {% for date, logs in grouped_logs.items %}
+            <h3 class="date">{{ date }}</h3>
+            <div class="log-table">
+                {% for log in logs %}
+                    <div class="log-row" data-level="{{ log.priority }}">
+                        <p class="log-time">{{ log.timestamp|date:"H:i:s" }}</p>
+                        <p class="log-level">{{ log.priority }}</p>
+                        <p class="log-service">{{ log.service }}</p>
+                        <p class="log-msg">{{ log.message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+            <span class="divider"></span>
+        {% endfor %}
+    </div>
+</div>
 </body>
-</html>
 {% endblock %}

@@ -14,16 +14,29 @@ class TimeSeriesData(models.Model):
 
     def __str__(self):
         return f"{self.metric_type.name} at {self.timestamp}"
-    
-    
+
 class LogEntry(models.Model):
+    PRIORITY_CHOICES = [
+        ('DEBUG', 'Debug'),
+        ('INFO', 'Info'),
+        ('NOTICE', 'Notice'),
+        ('WARNING', 'Warning'),
+        ('ERROR', 'Error'),
+        ('CRITICAL', 'Critical'),
+        ('ALERT', 'Alert'),
+        ('EMERGENCY', 'Emergency'),
+    ]
+
     timestamp = models.DateTimeField()
+    hostname = models.CharField(max_length=255, null=True, blank=True)
     service = models.CharField(max_length=255)
-    priority = models.CharField(max_length=50)
+    priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES)
     message = models.TextField()
 
     class Meta:
-        ordering = ['-timestamp']  # Latest logs first
+        ordering = ['-timestamp']
 
     def __str__(self):
         return f"[{self.timestamp}] {self.service}: {self.message[:50]}"
+#TODO: finish later consult with chatgpt have to rewrite the 
+#      whole log collection and storage
