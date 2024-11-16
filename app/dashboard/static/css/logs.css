@@ -75,6 +75,7 @@ body {
 }
 
 .log-row {
+    font-family: "Fira Code", "Consolas", "Courier New", monospace;
     display: flex;
     gap: 15px;
     padding: 8px;
@@ -106,20 +107,25 @@ body {
 }
 
 /* Apply colors based on log priority */
-.log-row[data-level="INFO"] {
-    border-left-color: var(--info-color);
+.log-row[data-level="EMERGENCY"] {
+    color: var(--info-color);
+    background-color: rgba(var(--info-color), 0.1);
 }
-
+.log-row[data-level="ALERT"] {
+    color: var(--warning-color);
+    background-color: rgba(var(--warning-color), 0.1);
+}
 .log-row[data-level="WARNING"] {
-    border-left-color: var(--warning-color);
+    color: var(--warning-color);
+    background-color: rgba(var(--warning-color), 0.1);
 }
 
 .log-row[data-level="ERROR"] {
-    border-left-color: var(--error-color);
+    color: var(--error-color);
 }
 
 .log-row[data-level="DEBUG"] {
-    border-left-color: var(--debug-color);
+    color: var(--debug-color);
 }
 
 .divider {

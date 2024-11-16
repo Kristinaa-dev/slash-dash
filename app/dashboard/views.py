@@ -6,6 +6,7 @@ from .models import TimeSeriesData, MetricType, LogEntry
 from collections import defaultdict
 from django.db.models.functions import TruncDate
 from django.db.models import DateField, Max, Min
+from django.db import models
 from itertools import groupby
 from django.contrib.auth import login
 from django.contrib.auth import authenticate, login, logout
@@ -175,28 +176,13 @@ def latest_data(request):
     return JsonResponse(data)
 
 # LOGS
-from django.db.models import Min
-from django.shortcuts import render
-from datetime import datetime
-from .models import LogEntry
-
 def logs(request):
-    # Retrieve filter parameters from the request
-    selected_priority = request.GET.get('priority', 'all')
-    selected_service = request.GET.get('service', 'all')
-    selected_date = request.GET.get('date', None)
-    search_term = request.GET.get('search', '')
+    selected_date = request.GET.get('date')
+    search_term = request.GET.get('search')
+    selected_priority = request.GET.get('priority')
+    selected_service = request.GET.get('service')
 
-    # Start with all logs
     logs = LogEntry.objects.all()
-
-    # Filter by priority if specified
-    if selected_priority != 'all':
-        logs = logs.filter(priority=selected_priority)
-
-    # Filter by service if specified
-    if selected_service != 'all':
-        logs = logs.filter(service=selected_service)
 
     # Filter by date if specified
     if selected_date:
@@ -215,20 +201,15 @@ def logs(request):
             models.Q(service__icontains=search_term)
         )
 
-    # Group logs by date
-    grouped_logs = {}
-    for log in logs.order_by('-timestamp'):
-        date_str = log.timestamp.date()
-        if date_str not in grouped_logs:
-            grouped_logs[date_str] = []
-        grouped_logs[date_str].append(log)
+    # Limit to the last 20 logs
+    logs = logs.order_by('-timestamp')[:20]
 
     # Get unique priorities and services for the filter dropdowns
     unique_priorities = LogEntry.PRIORITY_CHOICES
     unique_services = LogEntry.objects.values_list('service', flat=True).distinct()
 
     return render(request, 'dashboard/logs.html', {
-        'grouped_logs': grouped_logs,
+        'logs': logs,
         'unique_priorities': unique_priorities,
         'unique_services': unique_services,
         'selected_priority': selected_priority,
@@ -236,7 +217,6 @@ def logs(request):
         'selected_date': selected_date,
         'search_term': search_term,
     })
-
 # Login 
 
 def custom_login(request):

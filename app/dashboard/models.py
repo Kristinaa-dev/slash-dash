@@ -16,21 +16,23 @@ class TimeSeriesData(models.Model):
         return f"{self.metric_type.name} at {self.timestamp}"
 
 class LogEntry(models.Model):
+
     PRIORITY_CHOICES = [
-        ('DEBUG', 'Debug'),
-        ('INFO', 'Info'),
-        ('NOTICE', 'Notice'),
-        ('WARNING', 'Warning'),
-        ('ERROR', 'Error'),
-        ('CRITICAL', 'Critical'),
-        ('ALERT', 'Alert'),
-        ('EMERGENCY', 'Emergency'),
+        (0, 'Debug'),
+        (1, 'Info'),
+        (2, 'Notice'),
+        (3, 'Warning'),
+        (4, 'Error'),
+        (5, 'Critical'),
+        (6, 'Alert'),
+        (7, 'Emergency'),
     ]
+    
 
     timestamp = models.DateTimeField()
     hostname = models.CharField(max_length=255, null=True, blank=True)
     service = models.CharField(max_length=255)
-    priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES)
+    priority = models.IntegerField(choices=PRIORITY_CHOICES)
     message = models.TextField()
 
     class Meta:
