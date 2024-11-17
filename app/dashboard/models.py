@@ -18,14 +18,14 @@ class TimeSeriesData(models.Model):
 class LogEntry(models.Model):
 
     PRIORITY_CHOICES = [
-        (0, 'Debug'),
-        (1, 'Info'),
-        (2, 'Notice'),
-        (3, 'Warning'),
-        (4, 'Error'),
-        (5, 'Critical'),
-        (6, 'Alert'),
-        (7, 'Emergency'),
+        (7, 'Debug'),
+        (6, 'Info'),
+        (5, 'Notice'),
+        (4, 'Warning'),
+        (3, 'Error'),
+        (2, 'Critical'),
+        (1, 'Alert'),
+        (0, 'Emergency'),
     ]
     
 

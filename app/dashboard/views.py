@@ -177,6 +177,7 @@ def latest_data(request):
 
 # LOGS
 def logs(request):
+    from datetime import datetime
     selected_date = request.GET.get('date')
     search_term = request.GET.get('search')
     selected_priority = request.GET.get('priority')
@@ -184,27 +185,37 @@ def logs(request):
 
     logs = LogEntry.objects.all()
 
-    # Filter by date if specified
-    if selected_date:
+    print(f"Request GET data: {request.GET}")
+    print(f"Selected priority (raw): {selected_priority}")
+
+    if selected_priority and selected_priority != 'all':
         try:
-            # Convert date string to date object
-            date_obj = datetime.strptime(selected_date, '%Y-%m-%d').date()
-            logs = logs.filter(timestamp__date=date_obj)
+            priority_value = int(selected_priority)
+            logs = logs.filter(priority=priority_value)
         except ValueError:
-            # If date format is incorrect, ignore the date filter
             pass
+    else:
+        pass
+    
+    # if selected_date:
+    #     try:
+    #         date_obj = datetime.strptime(selected_date, '%Y-%m-%d').date()
+    #         logs = logs.filter(timestamp__date=date_obj)
+    #     except ValueError:
+    #         pass  # Ignore invalid date formats
+        
+    # if search_term:
+    #     logs = logs.filter(
+    #         models.Q(message__icontains=search_term) |
+    #         models.Q(service__icontains=search_term)
+    #     )
+    # TODO: Fix the service select so it doesn't ruin the priority filter        
+    # if selected_service:
+    #     logs = logs.filter(service=selected_service)
 
-    # Filter by search term in message or service
-    if search_term:
-        logs = logs.filter(
-            models.Q(message__icontains=search_term) |
-            models.Q(service__icontains=search_term)
-        )
 
-    # Limit to the last 20 logs
-    logs = logs.order_by('-timestamp')[:20]
+    logs = logs.order_by('-timestamp')[:19]
 
-    # Get unique priorities and services for the filter dropdowns
     unique_priorities = LogEntry.PRIORITY_CHOICES
     unique_services = LogEntry.objects.values_list('service', flat=True).distinct()
 
@@ -217,6 +228,8 @@ def logs(request):
         'selected_date': selected_date,
         'search_term': search_term,
     })
+
+
 # Login 
 
 def custom_login(request):
@@ -241,7 +254,6 @@ def custom_login(request):
     return render(request, 'authentication/login.html', {'form': form})
 
 # LOGOUT
-# views.py
 
 def custom_logout(request):
     logout(request)
