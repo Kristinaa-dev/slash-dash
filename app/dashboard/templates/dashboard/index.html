@@ -18,19 +18,17 @@
     <h2 class="title">/dash</h2>
     <div class="graphs-container">
         <div class="graph">
-            <canvas id="cpuChart"></canvas>
+            <h3 class="graph-title">Resource Usage Over Time</h3>
+            <canvas id="percentChart"></canvas>
         </div>
-        <div class="graph">
-            <canvas id="memoryChart"></canvas>
-        </div>
-        <div class="graph">
+        {% comment %} <div class="graph">
             <canvas id="networkChart"></canvas>
         </div>
         <div class="graph">
             <canvas id="diskChart"></canvas>
-        </div>
-
+        </div> {% endcomment %}
     </div>
+
 
     <script>
         // Data from Django context
@@ -38,13 +36,15 @@
         console.log(data);
         var maxDataPoints = 10 * 60; // 10 minutes worth of data if updated every second
 
-        // Initialize the charts
-        var cpuChart = createChartPercent(
-            'cpuChart', 'CPU Usage (%)', data.cpu_usage.timestamps, data.cpu_usage.values, 'CPU Usage (%)'
+        // Initialize the combined percentage chart
+        var percentChart = createCombinedPercentChart(
+            'percentChart', 
+            data.cpu_usage.timestamps, 
+            data.cpu_usage.values, 
+            data.memory_usage.values
         );
-        var memoryChart = createChartPercent(
-            'memoryChart', 'Memory Usage (%)', data.memory_usage.timestamps, data.memory_usage.values, 'Memory Usage (%)'
-        );
+
+        // Initialize the other charts
         var networkChart = createChartBytes(
             'networkChart', 'Network I/O (MB)', data.network_io.timestamps, data.network_io.values, 'Bytes'
         );
@@ -52,60 +52,60 @@
             'diskChart', 'Disk I/O (MB)', data.disk_io.timestamps, data.disk_io.values, 'Bytes'
         );
 
-        // Function to create a chart for percentage data
-        function createChartPercent(canvasId, label, dataLabels, dataValues, yLabel) {
+        // Function to create a combined chart for CPU and Memory usage percentages
+        function createCombinedPercentChart(canvasId, dataLabels, cpuDataValues, memoryDataValues) {
             var ctx = document.getElementById(canvasId).getContext('2d');
             return new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: dataLabels,
-                    datasets: [{
-                        label: label,
-                        data: dataValues,
-                        // borderColor: 'rgba(75, 192, 192, 1)',
-                        //fill: false,
-                        tension: 0.1,
-                        backgroundColor: 'rgba(36, 164, 167, 0.1)', // Light color fill
-                        borderColor: 'rgba(36, 164, 167, 1)',     // Border color
-                        borderWidth: 2,
-                        fill: true,   // Fills the area under the line
-                        pointRadius: 0 // Removes the dot
-                    }]
+                    datasets: [
+                        {
+                            label: 'CPU Usage (%)',
+                            data: cpuDataValues,
+                            backgroundColor: 'rgba(34, 129, 197, 0.1)', // Light color fill
+                            borderColor: 'rgba(34, 129, 197, 1)',     // Border color
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Memory Usage (%)',
+                            data: memoryDataValues,
+                            backgroundColor: 'rgba(216, 112, 255, 0.1)', // Light color fill
+                            borderColor: 'rgba(216, 112, 255, 1)',     // Border color
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }
+                    ]
                 },
                 options: {
                     plugins: {
-                        title: { display: true, text: label },
-                        legend: { display: false }
+                        title: { display: false, text: 'CPU and Memory Usage (%)' },
+                        legend: { display: true }
                     },
-                    scales: {
-                        x: { display: true, title: { display: true, text: 'Time' } },
-                        y: { title: { display: true, text: yLabel } },
-                    }
+                scales: {
+                    x: { 
+                        display: true, 
+                        title: { display: false, text: 'Time' },
+                        grid: {
+                            color: (context) => context.index === 0 ? 'white': 'rgba(255,255,255,0.1)',
+                            borderDash: [5, 5], // Dashed grid lines
+                        },
+                    },
+                    y: { 
+                        title: { display: false, text: 'Usage (%)' }, 
+                        min: 0, 
+                        max:100, 
+                        grid: {
+                            color: (context) => context.index === 0 ? 'white' : 'rgba(255,255,255,0.1)', // White for the first vertical line
+                            borderDash: [5, 5], // Dashed grid lines
+                        },
+                    },
                 }
-            });
-        }
-
-        // Function to create a chart for bytes data
-        function createChartBytes(canvasId, label, dataLabels, dataValues, yLabel) {
-            let dataValuesInGB = dataValues.map(value => value / (1024 ** 3));
-            var ctx = document.getElementById(canvasId).getContext('2d');
-            return new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dataLabels,
-                    datasets: [{
-                        label: label,
-                        data: dataValuesInGB,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        fill: false,
-                        tension: 0.1,
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: { display: true },
-                        y: { display: true },
-                    }
                 }
             });
         }
@@ -115,16 +115,38 @@
             fetch('{% url "latest_data" %}')
                 .then(response => response.json())
                 .then(latestData => {
-                    // Update each chart with new data and discard the oldest if over the limit
-                    updateChartData(cpuChart, latestData.cpu_usage.timestamp, latestData.cpu_usage.value);
-                    updateChartData(memoryChart, latestData.memory_usage.timestamp, latestData.memory_usage.value);
+                    // Update the combined percent chart
+                    updatePercentChartData(
+                        percentChart, 
+                        latestData.cpu_usage.timestamp, 
+                        latestData.cpu_usage.value, 
+                        latestData.memory_usage.value
+                    );
+
+                    // Update other charts
                     updateChartData(networkChart, latestData.network_io.timestamp, latestData.network_io.value);
                     updateChartData(diskChart, latestData.disk_io.timestamp, latestData.disk_io.value);
                 })
                 .catch(error => console.error('Error fetching latest data:', error));
         }
 
-        // Function to update chart data
+        // Function to update the combined percent chart data
+        function updatePercentChartData(chart, newTimestamp, newCpuValue, newMemoryValue) {
+            chart.data.labels.push(newTimestamp);
+            chart.data.datasets[0].data.push(newCpuValue);
+            chart.data.datasets[1].data.push(newMemoryValue);
+
+            // Remove oldest data point if exceeding max data points
+            if (chart.data.labels.length > maxDataPoints) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+                chart.data.datasets[1].data.shift();
+            }
+
+            chart.update();
+        }
+
+        // Function to update chart data for single datasets
         function updateChartData(chart, newTimestamp, newValue) {
             chart.data.labels.push(newTimestamp);
             chart.data.datasets[0].data.push(newValue);
@@ -140,6 +162,7 @@
 
         // Update the chart every minute (60000 milliseconds)
         setInterval(updateChart, 60000);
+
     </script>
 </body>
 </html>

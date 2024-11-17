@@ -12,7 +12,7 @@
 </head>
 <body>
 <div class="main-content">
-    <h2 class="title">Dashboard > System Logs</h2>
+    <h2 class="title">/dash/logs</h2>
 
     <!-- Filter Form -->
     <form method="get" action="">
@@ -25,10 +25,11 @@
             <!-- Priority Filter -->
             <div class="control-item">
                 <select name="priority" class="log-level-select">
-                    <option value="all">All Levels</option>
-                    {% for key, value in unique_priorities %}
-                        <option value="{{ key }}" {% if selected_priority|stringformat:"s" == key|stringformat:"s" %}selected{% endif %}>{{ value }}</option>
-                    {% endfor %}
+                    <option value="all" {% if selected_priority == "all" or not selected_priority %}selected{% endif %}>All Levels</option>
+                {% for key, value in unique_priorities %}
+                    <option value="{{ key }}" {% if selected_priority == key|stringformat:"s" %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+
                 </select>
             </div>
 
