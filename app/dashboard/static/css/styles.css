@@ -22,6 +22,8 @@ body {
     padding: 10px;
     background-color: var(--background-dark-secondary);
     border-radius: 5px;
+    margin-bottom: 20px;
+    font-family: "Fira Code", "Consolas", "Courier New", monospace;
 }
 .main-content {
     display: flex;

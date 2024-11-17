@@ -7,10 +7,16 @@
 
 .graph{
 	background-color: var(--background-dark-secondary);
-	width: 440px;
+	width: 800px;
+	padding: 30px;
 }
 .graphs-container{
 	display: flex;
 	padding: 20px;
 	gap: 10px;
+}
+.graph-title{
+	color: white;
+	font-size: 20px;
+	font-weight: 600;
 }

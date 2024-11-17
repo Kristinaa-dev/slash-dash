@@ -2,11 +2,22 @@
     --background-dark: #0c0d11;
     --background-dark-secondary: #15161a;
     --text-color: #ffffff;
+    --text-color-time: #ffffffda;
     --text-gray: #888;
 	--info-color: #3B82F6;
+    --info-color-t: #3b82f610;
 	--warning-color: #EAB308;
+    --warning-color-t: #eab20810;
+    --alert-color: #F59E0B;
+    --alert-color-t: #f59e0b10;
 	--error-color: #EF4444;
+    --error-color-t: #ef444410;
 	--debug-color: #22C55E;
+    --debug-color-t: #22c55e10;
+    /* --button-bg: #D870FF;
+    --button-hover-bg: #d970ffe3; */
+    --button-bg: #2281c5;    /* Deep teal/blue for button */
+    --button-hover-bg: #5A9DE4; /* Lighter blue for hover effect */
 }
 
 body {
@@ -15,15 +26,9 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.main-content {
-    padding: 20px;
-}
 
-.title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
+
+
 
 .controls {
     display: flex;
@@ -43,7 +48,8 @@ body {
 .search-input {
     width: 100%;
     padding: 8px;
-    border: 1px solid var(--text-gray);
+    /* border: 1px solid var(--text-gray); */
+    border: none;
     background-color: var(--background-dark-secondary);
     color: var(--text-color);
     border-radius: 4px;
@@ -51,11 +57,12 @@ body {
 
 .filter-button {
     padding: 8px 16px;
-    background-color: var(--background-dark-secondary);
+    background-color: var(--button-bg);
     color: var(--text-color);
-    border: 1px solid var(--text-gray);
+    font-weight: bold;
     border-radius: 4px;
     cursor: pointer;
+    border: none;
 }
 
 .display {
@@ -107,29 +114,54 @@ body {
 }
 
 /* Apply colors based on log priority */
+
+
 .log-row[data-level="EMERGENCY"] {
-    color: var(--info-color);
-    background-color: rgba(var(--info-color), 0.1);
+    color: var(--error-color);
+    background-color: var(--error-color-t);
+}
+.log-row[data-level="ERROR"] {
+    color: var(--error-color);
+    background-color: var(--error-color-t);
 }
 .log-row[data-level="ALERT"] {
-    color: var(--warning-color);
-    background-color: rgba(var(--warning-color), 0.1);
+    color: var(--alert-color);
+    background-color: var(--alert-color-t);
 }
 .log-row[data-level="WARNING"] {
     color: var(--warning-color);
-    background-color: rgba(var(--warning-color), 0.1);
+    background-color: var(--warning-color-t);
 }
 
-.log-row[data-level="ERROR"] {
-    color: var(--error-color);
+.log-row[data-level="INFO"] {
+    color: var(--info-color);
+    background-color: var(--info-color-t);
 }
-
+.log-row[data-level="NOTICE"] {
+    color: var(--info-color);
+    background-color: var(--info-color-t);
+}
 .log-row[data-level="DEBUG"] {
     color: var(--debug-color);
+    background-color: var(--debug-color-t);
 }
 
 .divider {
     height: 10px;
     background-color: var(--background-dark);
     margin: 20px 0;
+}
+
+.timestamp{
+    color: var(--text-color-time);
+}
+.priority{
+    font-weight: bold;
+}
+.service{
+    color: #c084fcea;
+    font-weight: 600;
+}
+.message{
+    color: var(--text-color)
 }
