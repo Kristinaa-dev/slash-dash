@@ -21,7 +21,6 @@ cryptography==43.0.3
 daphne==4.1.2
 Django==5.1.2
 django-celery-beat==2.7.0
-django-channels==0.7.0
 django-timezone-field==7.0
 docker==7.1.0
 h11==0.14.0
