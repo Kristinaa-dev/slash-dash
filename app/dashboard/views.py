@@ -181,7 +181,6 @@ def logs(request):
     selected_date = request.GET.get('date')
     search_term = request.GET.get('search')
     selected_priority = request.GET.get('priority')
-    selected_service = request.GET.get('service')
 
     logs = LogEntry.objects.all()
 
@@ -196,13 +195,12 @@ def logs(request):
             pass
     else:
         pass
-    
-    # if selected_date:
-    #     try:
-    #         date_obj = datetime.strptime(selected_date, '%Y-%m-%d').date()
-    #         logs = logs.filter(timestamp__date=date_obj)
-    #     except ValueError:
-    #         pass  # Ignore invalid date formats
+    if selected_date != None:
+        try:
+            date_obj = datetime.strptime(selected_date, '%Y-%m-%d').date()
+            logs = logs.filter(timestamp__date=date_obj)
+        except ValueError:
+            pass  
         
     # if search_term:
     #     logs = logs.filter(
@@ -223,7 +221,6 @@ def logs(request):
         'logs': logs,
         'unique_priorities': unique_priorities,
         'selected_priority': selected_priority,
-        'selected_service': selected_service,
         'selected_date': selected_date,
         'search_term': search_term,
     })
