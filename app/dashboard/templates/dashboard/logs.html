@@ -33,16 +33,6 @@
                 </select>
             </div>
 
-            <!-- Service Filter -->
-            <div class="control-item">
-                <select name="service" class="service-select">
-                    <option value="all">All Services</option>
-                    {% for service in unique_services %}
-                        <option value="{{ service }}" {% if selected_service == service %}selected{% endif %}>{{ service }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
             <!-- Search Input -->
             <div class="control-item search-container">
                 <input type="text" name="search" value="{{ search_term }}" class="search-input" placeholder="Search logs..." />
