@@ -183,9 +183,8 @@ def logs(request):
     selected_priority = request.GET.get('priority')
 
     logs = LogEntry.objects.all()
-
-    # print(f"Request GET data: {request.GET}")
-    # print(f"Selected priority (raw): {selected_priority}")
+    
+    print(search_term)
 
     if selected_priority and selected_priority != 'all':
         try:
@@ -202,20 +201,15 @@ def logs(request):
         except ValueError:
             pass  
         
-    # if search_term:
-    #     logs = logs.filter(
-    #         models.Q(message__icontains=search_term) |
-    #         models.Q(service__icontains=search_term)
-    #     )
-    # TODO: Fix the service select so it doesn't ruin the priority filter        
-    # if selected_service:
-    #     logs = logs.filter(service=selected_service)
-
+    if search_term != None:
+        logs = logs.filter(
+            models.Q(message__icontains=search_term) |
+            models.Q(service__icontains=search_term)
+        )
 
     logs = logs.order_by('-timestamp')[:19]
 
     unique_priorities = LogEntry.PRIORITY_CHOICES
-    # unique_services = LogEntry.objects.values_list('service', flat=True).distinct()
 
     return render(request, 'dashboard/logs.html', {
         'logs': logs,
