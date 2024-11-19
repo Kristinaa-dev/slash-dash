@@ -185,8 +185,8 @@ def logs(request):
 
     logs = LogEntry.objects.all()
 
-    print(f"Request GET data: {request.GET}")
-    print(f"Selected priority (raw): {selected_priority}")
+    # print(f"Request GET data: {request.GET}")
+    # print(f"Selected priority (raw): {selected_priority}")
 
     if selected_priority and selected_priority != 'all':
         try:
@@ -217,12 +217,11 @@ def logs(request):
     logs = logs.order_by('-timestamp')[:19]
 
     unique_priorities = LogEntry.PRIORITY_CHOICES
-    unique_services = LogEntry.objects.values_list('service', flat=True).distinct()
+    # unique_services = LogEntry.objects.values_list('service', flat=True).distinct()
 
     return render(request, 'dashboard/logs.html', {
         'logs': logs,
         'unique_priorities': unique_priorities,
-        'unique_services': unique_services,
         'selected_priority': selected_priority,
         'selected_service': selected_service,
         'selected_date': selected_date,
