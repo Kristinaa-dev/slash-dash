@@ -42,7 +42,7 @@ def parse_journalctl_json(log_json):
         return {
             'timestamp': timestamp,
             'service': log.get('_SYSTEMD_UNIT', 'Unknown'),
-            'priority': log.get('PRIORITY', 'Unknown'),
+            'priority': log.get('PRIORITY', 6),
             'message': log.get('MESSAGE', ''),
         }
     except (KeyError, ValueError, json.JSONDecodeError):
