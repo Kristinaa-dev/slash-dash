@@ -16,7 +16,9 @@ import psutil
 import platform
 import docker
 import datetime
+from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.csrf import csrf_exempt
 
 
 def is_admin(user):
@@ -50,83 +52,166 @@ def get_services_data():
 
 # DOCKER CONTAINER MANAGEMENT
 
-
 # Create a Docker client
 client = docker.from_env()
 
-def docker_monitor(request):
-    # Get all running containers
-    containers = client.containers.list(all=True)
+# Docker monitor view
 
-    # Collect data for each container
+
+
+def docker_monitor(request):
+    containers = client.containers.list(all=True)
     container_data = []
+
     for container in containers:
         stats = container.stats(stream=False)
-        
-        container_info = {
-            'name': container.name,
-            'status': container.status,
-            'cpu_usage': calculate_cpu_usage(stats),
-            'memory_usage': calculate_memory_usage(stats),
-            'network_io': calculate_network_io(stats),
-            'disk_io': calculate_disk_io(stats),
-            'restart_count': container.attrs['RestartCount'],
-            'ports': container.attrs['NetworkSettings']['Ports'],
-            'uptime': container.attrs['State']['StartedAt'],
-            'health_status': container.attrs['State'].get('Health', {}).get('Status', 'N/A')
-        }
-        container_data.append(container_info)
 
-    # Send the container data to the template
+        if container.status == 'running':
+            uptime = format_uptime(container.attrs['State']['StartedAt'])
+        else:
+            uptime = 'N/A'
+
+        memory_usage = calculate_memory_usage(stats)  # Get memory usage in the desired format
+
+        container_data.append({
+            'id': container.short_id,
+            'name': container.name,
+            'image': container.image.tags[0] if container.image.tags else "Unknown",  # Get the image tag
+            'ports': format_ports(container.attrs.get('NetworkSettings', {}).get('Ports', {})),
+            'cpu_usage': calculate_cpu_usage(stats),
+            'memory_usage': memory_usage,  # Include memory usage
+            'uptime': uptime,
+            'status': container.status,
+        })
+
     return render(request, 'dashboard/docker_monitor.html', {'containers': container_data})
+
+def calculate_memory_usage(stats):
+    try:
+        # Extract memory usage and limit
+        mem_usage = stats['memory_stats']['usage']
+        mem_limit = stats['memory_stats']['limit']
+
+        # Convert to human-readable units
+        current_usage, cur_unit = format_memory_size(mem_usage)
+        max_limit, max_unit = format_memory_size(mem_limit)
+
+        # Return formatted string
+        return f"{current_usage}{cur_unit} / {max_limit}{max_unit}"
+    except KeyError:
+        return "N/A"
+
+def format_memory_size(bytes_value):
+    units = ['B', 'KB', 'MB', 'GB', 'TB']
+    size = bytes_value
+    unit_index = 0
+
+    while size >= 1024 and unit_index < len(units) - 1:
+        size /= 1024
+        unit_index += 1
+
+    return round(size, 2), units[unit_index]
+
+
+
+def format_ports(ports_dict):
+    print(ports_dict)
+    formatted_ports = []
+    for port, bindings in ports_dict.items():
+        if bindings:
+            for binding in bindings:
+                print(binding)
+                port = port.split("/")[0]
+                formatted_ports.append(f"{port}:{binding['HostPort']}")
+        else:
+            formatted_ports.append(port)
+    return ", ".join(formatted_ports)
+
+
+
+
+def format_uptime(started_at):
+    try:
+        # Parse the ISO8601 timestamp
+        started_time = datetime.strptime(started_at.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        started_time = started_time.replace(tzinfo=None)  # Ensure timezone compatibility
+        now_time = datetime.utcnow()
+
+        # Calculate the difference
+        delta = now_time - started_time
+
+        # Convert to days, hours, or minutes
+        if delta.days > 0:
+            return f"{delta.days} days"
+        elif delta.seconds >= 3600:
+            hours = delta.seconds // 3600
+            return f"{hours} hours"
+        elif delta.seconds >= 60:
+            minutes = delta.seconds // 60
+            return f"{minutes} minutes"
+        else:
+            return "Just now"
+    except Exception as e:
+        return "N/A"
+
+@csrf_exempt
+def container_action(request, action, container_id):
+    try:
+        container = client.containers.get(container_id)
+
+        if action == 'start':
+            container.start()
+        elif action == 'stop':
+            container.stop()
+        elif action == 'restart':
+            container.restart()
+        else:
+            return JsonResponse({'error': 'Invalid action'}, status=400)
+
+        return JsonResponse({'status': f'{action.capitalize()}ed successfully'})
+    except docker.errors.NotFound:
+        return JsonResponse({'error': 'Container not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+    
 
 # Helper function for calculating CPU usage
 def calculate_cpu_usage(stats):
     try:
-        cpu_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - stats['precpu_stats']['cpu_usage']['total_usage']
-        system_delta = stats['cpu_stats']['system_cpu_usage'] - stats['precpu_stats']['system_cpu_usage']
-        cpu_usage = (cpu_delta / system_delta) * len(stats['cpu_stats']['cpu_usage']['percpu_usage']) * 100.0
-        return round(cpu_usage, 2)
-    except (KeyError, ZeroDivisionError):
-        return 'N/A'
+        # Check if container is running
+        print("STATS")
+        print(stats['status'])
+        # Extract relevant stats
+        cpu_stats = stats['cpu_stats']
+        precpu_stats = stats['precpu_stats']
 
-# Helper function for calculating memory usage
-def calculate_memory_usage(stats):
-    try:
-        mem_usage = stats['memory_stats']['usage']
-        mem_limit = stats['memory_stats']['limit']
-        return round((mem_usage / mem_limit) * 100.0, 2)
-    except KeyError:
-        return 'N/A'
+        # Total CPU usage (current and previous)
+        total_usage = cpu_stats['cpu_usage']['total_usage']
+        pre_total_usage = precpu_stats['cpu_usage']['total_usage']
 
-# Helper function for calculating network I/O
-def calculate_network_io(stats):
-    try:
-        networks = stats.get('networks', {})
-        io_data = {}
-        for interface, data in networks.items():
-            io_data[interface] = {
-                'rx_bytes': data['rx_bytes'],
-                'tx_bytes': data['tx_bytes']
-            }
-        return io_data
-    except KeyError:
-        return {}
+        # System CPU usage (current and previous)
+        system_cpu_usage = cpu_stats.get('system_cpu_usage', 0)
+        pre_system_cpu_usage = precpu_stats.get('system_cpu_usage', 0)
 
-# Helper function for calculating disk I/O
-def calculate_disk_io(stats):
-    try:
-        # Safely extract the disk IO data, ensuring it's not None
-        disk_io_data = stats.get('blkio_stats', {}).get('io_service_bytes_recursive', [])
-        if disk_io_data is None:
-            return {}
+        # Calculate deltas
+        cpu_delta = total_usage - pre_total_usage
+        system_delta = system_cpu_usage - pre_system_cpu_usage
 
-        io_data = {}
-        for item in disk_io_data:
-            io_data[item.get('op', 'Unknown')] = item.get('value', 0)
-        return io_data
-    except KeyError:
-        return {}
+        # Check for division by zero
+        if system_delta > 0 and cpu_delta > 0:
+            # Number of CPUs available to the container
+            num_cpus = len(cpu_stats['cpu_usage'].get('percpu_usage', []))
+
+            # Calculate CPU usage as a percentage
+            cpu_usage = (cpu_delta / system_delta) * num_cpus * 100.0
+            return f"{round(cpu_usage, 2)} %"
+
+        return 'N/A'  # Return 0.0 if no meaningful usage is detected
+    except ZeroDivisionError:
+        # Handle edge cases of division by zero
+        return 0.0
+
 
 # DB TEST
 @login_required
