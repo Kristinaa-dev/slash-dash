@@ -1,4 +1,7 @@
 venv/
+<<<<<<< HEAD
 RPJ/
 myenv/
+=======
+>>>>>>> 20b86ea2ddd67b6d2e0bec4546ddd062702acd94
 __pycache__/

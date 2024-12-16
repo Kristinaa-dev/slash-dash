@@ -1,0 +1,122 @@
+:root {
+    /* Background */
+    --background-dark: #0c0d11;
+    --background-dark-secondary: #15161a;
+	--restart: #EAB308;
+    --warning-color-t: #eab20810;
+    --alert-color: #F59E0B;
+    --alert-color-t: #f59e0b10;
+	--negative: #EF4444;
+    --error-color-t: #ef444410;
+	--positive: #22C55E;
+    --debug-color-t: #22c55e10;
+	--middle: #3B82F6;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0px;
+	padding: 0px;
+}
+
+table { 
+	border-collapse: collapse;
+}
+
+table, th, td { 
+	border: 1px solid var(--background-dark-secondary);
+}
+
+th { 
+	background-color: var(--background-dark-secondary); 
+}
+
+/* Dropdown container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown menu hidden by default */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: var(--background-dark-secondary);
+    border: 1px solid var(--background-dark);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    min-width: 120px;
+}
+
+/* Dropdown menu buttons */
+.dropdown-menu button {
+    background: none;
+    border: none;
+    color: white;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+/* Dropdown menu buttons hover */
+.dropdown-menu button:hover {
+    background-color: var(--background-dark);
+    color: var(--middle);
+}
+
+/* Show dropdown menu when active */
+.dropdown.active .dropdown-menu {
+    display: block;
+}
+/* Dropdown toggle button (three vertical dots) */
+.dropdown-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px; /* Adjust to match table row height */
+    width: 40px;
+    padding: 0;
+}
+
+
+/* General Status Styling */
+.status {
+    display: flex;
+    align-items: center;  /* Vertical alignment */
+    justify-content: center; /* Horizontal alignment */
+    text-align: center; /* Fallback for older browsers */
+}
+
+/* Status button styling */
+.status .info-button {
+    font-weight: bold;
+    border-radius: 25px; /* Rounded shape */
+    color: white;
+    display: inline-block;
+    text-align: center; /* Align text inside */
+	border: 1px solid white;
+}
+
+/* Status Colors */
+.status .info-button.running {
+    background-color: var(--positive); /* Green for running */
+}
+
+.status .info-button.stopped {
+    background-color: var(--negative); /* Red for stopped */
+}
+
+.status .info-button.paused {
+    background-color: var(--alert-color); /* Yellow for paused */
+}
+
+.status .info-button.unknown {
+    background-color: var(--negative); /* Neutral for unknown */
+}

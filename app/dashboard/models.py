@@ -28,11 +28,10 @@ class LogEntry(models.Model):
         (0, 'Emergency'),
     ]
     
-
     timestamp = models.DateTimeField()
     hostname = models.CharField(max_length=255, null=True, blank=True)
     service = models.CharField(max_length=255)
-    priority = models.IntegerField(choices=PRIORITY_CHOICES)
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=6)
     message = models.TextField()
 
     class Meta:
@@ -40,5 +39,6 @@ class LogEntry(models.Model):
 
     def __str__(self):
         return f"[{self.timestamp}] {self.service}: {self.message[:50]}"
+
 #TODO: finish later consult with chatgpt have to rewrite the 
 #      whole log collection and storage
