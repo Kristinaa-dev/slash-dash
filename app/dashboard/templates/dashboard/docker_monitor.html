@@ -4,65 +4,101 @@
 {% endblock %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <title>Docker Monitor</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        table { width: 100%; border-collapse: collapse;}
-        table, th, td { border: 1px solid #ccc; padding: 10px; }
-        th { background-color: black; }
-    </style>
-</head>
-<body>
-    <h2 class="title">/dash/docker</h2>
-    <table>
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+      <link rel="stylesheet" href="{% static 'css/docker.css' %}" />
+      <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+      <title>Docker Monitor</title>
+    </head>
+    <body>
+      <h2 class="title">/dash/docker</h2>
+      <table>
         <thead>
-            <tr>
-                <th>Container Name</th>
-                <th>Status</th>
-                <th>CPU Usage (%)</th>
-                <th>Memory Usage (%)</th>
-                <th>Network IO (Rx/Tx Bytes)</th>
-                <th>Restart Count</th>
-                <th>Ports</th>
-                <th>Logs</th>
-                <th>Uptime</th>
-                <th>Health Status</th>
-            </tr>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Image</th>
+            <th>Ports</th>
+            <th>Uptime</th>
+            <th>CPU Usage (%)</th>
+            <th>Memory Usage</th> <!-- New column for memory usage -->
+            <th>Actions</th>
+          </tr>
         </thead>
         <tbody>
-            {% for container in containers %}
+          {% for container in containers %}
             <tr>
-                <td>{{ container.name }}</td>
-                <td>{{ container.status }}</td>
-                <td>{{ container.cpu_usage }}%</td>
-                <td>{{ container.memory_usage }}%</td>
-                <td>
-                    {% for interface, io in container.network_io.items %}
-                        {{ interface }}: Rx {{ io.rx_bytes }} bytes, Tx {{ io.tx_bytes }} bytes <br>
-                    {% endfor %}
-                </td>
-                <td>{{ container.restart_count }}</td>
-                <td>
-                    {% for port, config in container.ports.items %}
-                        {{ port }}: {{ config.0.HostIp }}:{{ config.0.HostPort }} <br>
-                    {% endfor %}
-                </td>
-                <td><pre>{{ container.logs }}</pre></td>
-                <td>{{ container.uptime }}</td>
-                <td>{{ container.health_status }}</td>
+              <td>{{ container.name }}</td>
+              <td class="status">
+                <div class="info-button {% if container.status == 'running' %}
+                    running
+                  {% elif container.status == 'stopped' %}
+                    stopped
+                  {% elif container.status == 'paused' %}
+                    paused
+                  {% else %}
+                    unknown
+                  {% endif %}">{{ container.status|capfirst }}</div>
+              </td>
+              <td>{{ container.image }}</td>
+              <td>{{ container.ports }}</td>
+              <td>{{ container.uptime }}</td>
+              <td>{{ container.cpu_usage }}</td>
+              <td>{{ container.memory_usage }}</td> <!-- Display memory usage -->
+              <td>
+                <div class="dropdown">
+                  <button class="dropdown-toggle">&#8942;</button>
+                  <div class="dropdown-menu">
+                    <button onclick="manageContainer('start', '{{ container.id }}')">Start</button>
+                    <button onclick="manageContainer('stop', '{{ container.id }}')">Stop</button>
+                    <button onclick="manageContainer('restart', '{{ container.id }}')">Restart</button>
+                  </div>
+                </div>
+              </td>
             </tr>
-            {% endfor %}
+          {% endfor %}
         </tbody>
-    </table>
-</body>
-</html>
+      </table>
 
-
+      <script>
+        function manageContainer(action, containerId) {
+          fetch(`/docker-action/${action}/${containerId}/`, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+            }
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) {
+                alert(`Error: ${data.error}`)
+              } else {
+                alert(data.status)
+                location.reload()
+              }
+            })
+        }
+        document.addEventListener('click', function (event) {
+          const dropdowns = document.querySelectorAll('.dropdown')
+        
+          dropdowns.forEach((dropdown) => {
+            // Close other dropdowns when clicking outside
+            if (!dropdown.contains(event.target)) {
+              dropdown.classList.remove('active')
+            }
+          })
+        
+          // Toggle the current dropdown
+          if (event.target.closest('.dropdown-toggle')) {
+            const dropdown = event.target.closest('.dropdown')
+            dropdown.classList.toggle('active')
+          }
+        })
+      </script>
+    </body>
+  </html>
 {% endblock %}
