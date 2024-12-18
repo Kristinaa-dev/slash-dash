@@ -16,7 +16,6 @@ import psutil
 import platform
 import docker
 import datetime
-from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 
@@ -115,12 +114,10 @@ def format_memory_size(bytes_value):
 
 
 def format_ports(ports_dict):
-    print(ports_dict)
     formatted_ports = []
     for port, bindings in ports_dict.items():
         if bindings:
             for binding in bindings:
-                print(binding)
                 port = port.split("/")[0]
                 formatted_ports.append(f"{port}:{binding['HostPort']}")
         else:
@@ -180,8 +177,7 @@ def container_action(request, action, container_id):
 def calculate_cpu_usage(stats):
     try:
         # Check if container is running
-        print("STATS")
-        print(stats['status'])
+        # print(stats['status'])
         # Extract relevant stats
         cpu_stats = stats['cpu_stats']
         precpu_stats = stats['precpu_stats']
@@ -269,7 +265,6 @@ def logs(request):
 
     logs = LogEntry.objects.all()
     
-    print(search_term)
 
     if selected_priority and selected_priority != 'all':
         try:
