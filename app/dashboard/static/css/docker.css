@@ -2,33 +2,76 @@
     /* Background */
     --background-dark: #0c0d11;
     --background-dark-secondary: #15161a;
-	--restart: #EAB308;
+    --background-light-grey: #ffffff25;
+    --restart: #EAB308;
     --warning-color-t: #eab20810;
     --alert-color: #F59E0B;
     --alert-color-t: #f59e0b10;
-	--negative: #EF4444;
+    --negative: #EF4444d0;
     --error-color-t: #ef444410;
-	--positive: #22C55E;
+    --positive: #22c55ed0;    
     --debug-color-t: #22c55e10;
-	--middle: #3B82F6;
+    --middle: #3B82F6;
+    --text-color: #ffffffe1;
+
 }
 
 * {
-	box-sizing: border-box;
-	margin: 0px;
-	padding: 0px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-table { 
-	border-collapse: collapse;
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--background-light-grey); /* Light grey outer border */
 }
 
-table, th, td { 
-	border: 1px solid var(--background-dark-secondary);
+th, td {
+    padding: 10px 15px; /* Add some padding for spacing */
+}
+th {
+    padding: 24px;
+}
+/* Table Header Styling */
+th {
+    background-color: var(--background-dark-secondary);
+    color: #ffffffc7; /* Lighter bold text */
+    text-align: left; /* Align text to the left for headers */
+    font-weight: bold;
+    border-bottom: 2px solid var(--background-dark-secondary); /* Divider only below header */
 }
 
-th { 
-	background-color: var(--background-dark-secondary); 
+/* Table Row Styling */
+tr {
+    border-bottom: 1px solid var(--background-light-grey); /* Border only between rows */
+}
+
+tr:last-child {
+    border-bottom: none; /* Remove bottom border for the last row */
+}
+
+/* Table Cell Alignment */
+td {
+    color: var(--text-color);
+    word-wrap: normal;
+    max-width: 200px;
+    padding: 16px 24px;
+    border: none; /* Remove vertical column borders */
+}
+
+.text-left {
+    text-align: left; /* Align content to the left */
+}
+
+.text-right {
+    text-align: right; /* Align content to the right */
+}
+
+.text-center {
+    text-align: center; /* Center align content */
 }
 
 /* Dropdown container */
@@ -53,7 +96,7 @@ th {
 .dropdown-menu button {
     background: none;
     border: none;
-    color: white;
+    color: var(--text-color);
     width: 100%;
     text-align: left;
     cursor: pointer;
@@ -70,53 +113,50 @@ th {
 .dropdown.active .dropdown-menu {
     display: block;
 }
+
 /* Dropdown toggle button (three vertical dots) */
 .dropdown-toggle {
     background: none;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: white;
+    color: var(--text-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 40px; /* Adjust to match table row height */
+    height: 40px;
     width: 40px;
     padding: 0;
 }
 
-
-/* General Status Styling */
-.status {
-    display: flex;
-    align-items: center;  /* Vertical alignment */
-    justify-content: center; /* Horizontal alignment */
-    text-align: center; /* Fallback for older browsers */
-}
-
-/* Status button styling */
+/* Status Styling */
 .status .info-button {
     font-weight: bold;
-    border-radius: 25px; /* Rounded shape */
+    border-radius: 25px;
     color: white;
     display: inline-block;
-    text-align: center; /* Align text inside */
-	border: 1px solid white;
+    text-align: center;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    min-width: 80px;
 }
 
 /* Status Colors */
 .status .info-button.running {
-    background-color: var(--positive); /* Green for running */
+    background-color: var(--positive);
 }
 
 .status .info-button.stopped {
-    background-color: var(--negative); /* Red for stopped */
+    background-color: var(--negative);
 }
 
 .status .info-button.paused {
-    background-color: var(--alert-color); /* Yellow for paused */
+    background-color: var(--alert-color);
 }
 
 .status .info-button.unknown {
-    background-color: var(--negative); /* Neutral for unknown */
+    background-color: var(--negative);
+}
+.cont-name{
+    font-weight: bold;
 }

@@ -6,11 +6,11 @@
     --warning-color-t: #eab20810;
     --alert-color: #F59E0B;
     --alert-color-t: #f59e0b10;
-	--negative: #EF4444;
+	/* --negative: #EF4444; */
     --error-color-t: #ef444410;
-	--positive: #22C55E;
+	/* --positive: #22C55E; */
     --debug-color-t: #22c55e10;
-	--middle: #3B82F6;
+	/* --middle: #3B82F6; */
 }
 * {
     box-sizing: border-box;
@@ -59,15 +59,7 @@ body {
     border-radius: 5px;
 }
 
-.positive{
-    background-color: var(--positive);
-}
-.negative{
-    background-color: var(--negative);
-}
-.middle{
-    background-color: var(--middle);
-}
+
 
 .docker-table{
     width: 100%;

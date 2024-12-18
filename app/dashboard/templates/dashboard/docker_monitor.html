@@ -21,19 +21,19 @@
           <tr>
             <th>Name</th>
             <th>Status</th>
-            <th>Image</th>
             <th>Ports</th>
             <th>Uptime</th>
             <th>CPU Usage (%)</th>
             <th>Memory Usage</th> <!-- New column for memory usage -->
-            <th>Actions</th>
+            <th>Image</th>
+            <th class="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
           {% for container in containers %}
             <tr>
-              <td>{{ container.name }}</td>
-              <td class="status">
+              <td class="cont-name">{{ container.name }}</td>
+              <td class="status text-left">
                 <div class="info-button {% if container.status == 'running' %}
                     running
                   {% elif container.status == 'stopped' %}
@@ -44,12 +44,12 @@
                     unknown
                   {% endif %}">{{ container.status|capfirst }}</div>
               </td>
-              <td>{{ container.image }}</td>
-              <td>{{ container.ports }}</td>
-              <td>{{ container.uptime }}</td>
-              <td>{{ container.cpu_usage }}</td>
-              <td>{{ container.memory_usage }}</td> <!-- Display memory usage -->
-              <td>
+              <td class="text-left">{{ container.ports }}</td>
+              <td class="text-left">{{ container.uptime }}</td>
+              <td class="text-left">{{ container.cpu_usage }}</td>
+              <td class="text-left">{{ container.memory_usage }}</td> <!-- Display memory usage -->
+              <td class="text-left">{{ container.image }}</td>
+              <td class="text-right">
                 <div class="dropdown">
                   <button class="dropdown-toggle">&#8942;</button>
                   <div class="dropdown-menu">
