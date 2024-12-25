@@ -33,14 +33,16 @@ celery_app.autodiscover_tasks()
 
 # Schedule a Bear
 # app/settings.py
-
 CELERY_BEAT_SCHEDULE = {
     "run-collect-metrics-every-minute": {
         "task": "dashboard.tasks.run_collect_metrics",
         "schedule": 60.0,  # Run every 60 seconds
     },
+    "cache-docker-stats-every-10-seconds": {
+        "task": "dashboard.tasks.cache_docker_stats",
+        "schedule": 10.0,  # Run every 10 seconds
+    },
 }
-
 
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 
