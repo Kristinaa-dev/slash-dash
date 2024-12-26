@@ -19,6 +19,8 @@ import datetime
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
+import time
+import concurrent.futures
 
 
 def is_admin(user):
@@ -57,63 +59,108 @@ client = docker.from_env()
 
 # Docker monitor view
 
-
 #TODO: Loading takes 5 sec need to optimize 
 # The slow down is in the for loop
-import time
+# The stats = container.stats(stream=False) is the slowest part
+
 from django.core.cache import cache
+import concurrent.futures
+import time
 
 def docker_monitor(request):
-    # Retrieve cached container stats
-    container_data = cache.get('docker_stats', [])
-    print(container_data)
-    # Handle the case where cache might be empty
-    if not container_data:
-        container_data = [{
-            'id': 'N/A',
-            'name': 'No Data',
-            'image': 'N/A',
-            'ports': 'N/A',
-            'cpu_usage': 'N/A',
-            'memory_usage': 'N/A',
-            'uptime': 'N/A',
-            'status': 'unknown'
-        }]
+    container_data = cache.get('docker_stats')
+    if container_data:
+        return render(request, 'dashboard/docker_monitor.html', {'containers': container_data})
 
+    start_time = time.time()
+    containers = client.containers.list(all=True)
+    container_data = []
+
+    def fetch_stats(container):
+        stats = container.stats(stream=False)
+        return {
+            'id': container.short_id,
+            'name': container.name,
+            'image': container.image.tags[0] if container.image.tags else "Unknown",
+            'ports': format_ports(container.attrs['NetworkSettings'].get('Ports', {})),
+            'cpu_usage': calculate_cpu_usage(stats),
+            'memory_usage': calculate_memory_usage(stats),
+            'uptime': format_uptime(container.attrs['State']['StartedAt']) if container.status == 'running' else 'N/A',
+            'status': container.status,
+        }
+
+    running = [c for c in containers if c.status == 'running']
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        for res in executor.map(fetch_stats, running):
+            container_data.append(res)
+
+    for c in containers:
+        if c.status != 'running':
+            container_data.append({
+                'id': c.short_id,
+                'name': c.name,
+                'image': c.image.tags[0] if c.image.tags else "Unknown",
+                'ports': format_ports(c.attrs['NetworkSettings'].get('Ports', {})),
+                'cpu_usage': 'N/A',
+                'memory_usage': 'N/A',
+                'uptime': 'N/A',
+                'status': c.status,
+            })
+
+    cache.set('docker_stats', container_data, timeout=30)
+    print(f"Total time: {time.time() - start_time:.2f}s")
     return render(request, 'dashboard/docker_monitor.html', {'containers': container_data})
 
 # def docker_monitor(request):
 #     start_time = time.time()
 #     containers = client.containers.list(all=True)
-#     print(f"Fetched containers: {time.time() - start_time:.2f}s")
-
 #     container_data = []
 
-#     for container in containers:
-#         container_start = time.time()
+#     def fetch_stats(container):
 #         stats = container.stats(stream=False)
-#         print(f"Stats fetched for {container.name}: {time.time() - container_start:.2f}s")
-
-#         if container.status == 'running':
-#             uptime = format_uptime(container.attrs['State']['StartedAt'])
-#         else:
-#             uptime = 'N/A'
-
 #         memory_usage = calculate_memory_usage(stats)
-
-#         container_data.append({
+#         cpu_usage = calculate_cpu_usage(stats)
+#         uptime = (
+#             format_uptime(container.attrs['State']['StartedAt'])
+#             if container.status == 'running' else 'N/A'
+#         )
+#         return {
 #             'id': container.short_id,
 #             'name': container.name,
 #             'image': container.image.tags[0] if container.image.tags else "Unknown",
 #             'ports': format_ports(container.attrs.get('NetworkSettings', {}).get('Ports', {})),
-#             'cpu_usage': calculate_cpu_usage(stats),
+#             'cpu_usage': cpu_usage,
 #             'memory_usage': memory_usage,
 #             'uptime': uptime,
 #             'status': container.status,
-#         })
+#         }
+
+#     running_containers = [c for c in containers if c.status == 'running']
+#     with concurrent.futures.ThreadPoolExecutor() as executor:
+#         results = executor.map(fetch_stats, running_containers)
+
+#     for res in results:
+#         container_data.append(res)
+
+#     # For non-running containers, just show basic info
+#     for c in containers:
+#         if c.status != 'running':
+#             container_data.append({
+#                 'id': c.short_id,
+#                 'name': c.name,
+#                 'image': c.image.tags[0] if c.image.tags else "Unknown",
+#                 'ports': format_ports(c.attrs.get('NetworkSettings', {}).get('Ports', {})),
+#                 'cpu_usage': 'N/A',
+#                 'memory_usage': 'N/A',
+#                 'uptime': 'N/A',
+#                 'status': c.status,
+#             })
+
 #     print(f"Total time: {time.time() - start_time:.2f}s")
 #     return render(request, 'dashboard/docker_monitor.html', {'containers': container_data})
-
+def get_docker_stats(request):
+    container_data = cache.get('docker_stats') or []
+    return JsonResponse(container_data, safe=False)
 
 def calculate_memory_usage(stats):
     try:

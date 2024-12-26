@@ -14,5 +14,8 @@ urlpatterns = [
     
     path('login/', views.custom_login, name='login'),
     path('logout/', views.custom_logout, name='logout'),
+    
+    path('get-docker-stats/', views.get_docker_stats, name='get_docker_stats'),
+
 ]
 

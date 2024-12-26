@@ -11,6 +11,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
       <link rel="stylesheet" href="{% static 'css/docker.css' %}" />
+      <script src="{% static 'js/docker.js' %}"></script>
       <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
       <title>Docker Monitor</title>
     </head>
@@ -97,7 +98,7 @@
             const dropdown = event.target.closest('.dropdown')
             dropdown.classList.toggle('active')
           }
-        })
+        });
       </script>
     </body>
   </html>

@@ -11,5 +11,31 @@ def run_collect_metrics():
     call_command("fetch_system_logs")
     
 @shared_task
-def cache_docker_stats():
-    call_command("fetch_docker_stats")
+def update_docker_stats():
+    client = docker.from_env()
+    containers = client.containers.list(all=True)
+    data_list = []
+    for container in containers:
+        # Only call stats for running containers
+        if container.status == 'running':
+            stats = container.stats(stream=False)
+            data_list.append({
+                'id': container.short_id,
+                'name': container.name,
+                'status': container.status,
+                'cpu_usage': calculate_cpu_usage(stats),
+                'memory_usage': calculate_memory_usage(stats),
+                'uptime': format_uptime(container.attrs['State']['StartedAt']),
+                'ports': format_ports(container.attrs['NetworkSettings']['Ports']),
+            })
+        else:
+            data_list.append({
+                'id': container.short_id,
+                'name': container.name,
+                'status': container.status,
+                'cpu_usage': 'N/A',
+                'memory_usage': 'N/A',
+                'uptime': 'N/A',
+                'ports': format_ports(container.attrs['NetworkSettings']['Ports']),
+            })
+    cache.set('docker_stats', data_list, timeout=30)

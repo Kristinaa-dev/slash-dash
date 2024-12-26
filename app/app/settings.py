@@ -39,8 +39,8 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 60.0,  # Run every 60 seconds
     },
     "cache-docker-stats-every-10-seconds": {
-        "task": "dashboard.tasks.cache_docker_stats",
-        "schedule": 10.0,  # Run every 10 seconds
+        "task": "dashboard.tasks.update_docker_stats",
+        "schedule": 30.0, 
     },
 }
 
@@ -173,3 +173,18 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# settings.py
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+# Optional: Set session cache to use Redis
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
