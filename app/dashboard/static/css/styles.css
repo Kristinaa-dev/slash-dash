@@ -2,21 +2,23 @@
     /* Background */
     --background-dark: #0c0d11;
     --background-dark-secondary: #15161a;
-	--restart: #EAB308;
+    --restart: #EAB308;
     --warning-color-t: #eab20810;
     --alert-color: #F59E0B;
     --alert-color-t: #f59e0b10;
-	/* --negative: #EF4444; */
+    /* --negative: #EF4444; */
     --error-color-t: #ef444410;
-	/* --positive: #22C55E; */
+    /* --positive: #22C55E; */
     --debug-color-t: #22c55e10;
-	/* --middle: #3B82F6; */
+    /* --middle: #3B82F6; */
 }
+
 * {
     box-sizing: border-box;
     margin: 0px;
     padding: 0px;
 }
+
 body {
     font-family: Arial, sans-serif;
     margin: 0px;
@@ -24,6 +26,7 @@ body {
     color: aliceblue;
     background-color: var(--background-dark);
 }
+
 .title {
     font-size: 1em;
     margin: 0px;
@@ -33,18 +36,18 @@ body {
     margin-bottom: 20px;
     font-family: "Fira Code", "Consolas", "Courier New", monospace;
 }
+
 .main-content {
     display: flex;
     flex-direction: column;
     /* align-items: center; */
     /* justify-content: center; */
     /* padding: 10px; */
-    margin: 10px;
-    margin-top: 10px;
-    margin-right: 30px;
     width: 100%;
+    margin: 20px;
 }
-.action-button{
+
+.action-button {
     border: 1px solid white;
     background-color: black;
     color: white;
@@ -59,10 +62,7 @@ body {
     border-radius: 5px;
 }
 
-
-
-.docker-table{
+.docker-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
 }

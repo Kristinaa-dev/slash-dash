@@ -2,21 +2,99 @@
     /* Background */
     --background-dark: #0c0d11;
     --background-dark-secondary: #15161a;
+	--progress: #ffffff2f;
+	--progress-display: #3B82F6;
     
 }
 
-.graph{
-	background-color: var(--background-dark-secondary);
-	width: 800px;
-	padding: 30px;
-}
-.graphs-container{
-	display: flex;
-	padding: 20px;
-	gap: 10px;
-}
 .graph-title{
 	color: white;
-	font-size: 20px;
+	font-size: 24px;
+    padding-top: 20px;
+    padding-bottom: 10px;
 	font-weight: 600;
+} 
+
+
+.small-graphs-container{
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	/* grid-template-rows: repeat(2, 200px); */
+	gap: 20px
+	
+	/* background-color: var(--background-dark-secondary); */
+}
+.graph {
+    background-color: var(--background-dark-secondary);
+    /* padding: 30px 20px; */
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 80px;
+    padding-top: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    height: 450px;
+    width: 100%; /* Ensure it takes full width */
+    margin-top: 20px;
+}
+
+.big-graphs-container{
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	/* grid-template-rows: repeat(2, 200px); */
+	gap: 20px
+	
+	/* background-color: var(--background-dark-secondary); */
+}
+.mid-graphs-container{
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	/* grid-template-rows: repeat(2, 200px); */
+	gap: 20px
+	
+	/* background-color: var(--background-dark-secondary); */
+}
+
+
+.main-content{
+	margin-bottom: 0px;
+}
+
+
+.card-title {
+	font-size: 18px;
+	margin-bottom: 10px;
+	color: #cccccc;
+}
+
+.percentage-label {
+	font-size: 24px;
+	font-weight: bold;
+	margin-bottom: 15px;
+	color: #ffffff;
+}
+
+.progress-bar {
+	background: var(--progress);
+	height: 15px;
+	border-radius: 8px;
+	overflow: hidden;
+	position: relative;
+}
+
+.progress-fill {
+	height: 100%;
+	width: 0;
+	transition: width 0.5s ease;
+}
+
+.fill{
+	background-color: var(--progress-display);
+}
+
+.card{
+	background-color: var(--background-dark-secondary);
+	padding: 20px;
+	border-radius: 10px;
 }
