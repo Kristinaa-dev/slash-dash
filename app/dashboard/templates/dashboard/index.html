@@ -4,168 +4,197 @@
 {% endblock %}
 
 {% block content %}
-<!-- dashboard/index.html -->
-<head>
-    <meta charset="UTF-8">
-    <title>System Usage Dashboard</title>
-
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/graphs.css' %}">
-    <title>System Monitoring Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/graphs.css' %}" />
+  </head>
+  <body>
     <h2 class="title">/dash</h2>
-    <div class="graphs-container">
-        <div class="graph">
-            <h3 class="graph-title">Resource Usage Over Time</h3>
-            <canvas id="percentChart"></canvas>
+
+    <div class="small-graphs-container">
+      <!-- CPU USAGE CARD -->
+      <div class="card">
+        <div class="card-title">CPU Usage</div>
+        <div class="percentage-label" id="cpuValue">--%</div>
+        <div class="progress-bar">
+          <div class="progress-fill fill" id="cpuBar"></div>
         </div>
-        {% comment %} <div class="graph">
-            <canvas id="networkChart"></canvas>
+      </div>
+
+      <!-- MEMORY USAGE CARD -->
+      <div class="card">
+        <div class="card-title">Memory Usage</div>
+        <div class="percentage-label" id="memoryValue">--%</div>
+        <div class="progress-bar">
+          <div class="progress-fill fill" id="memoryBar"></div>
         </div>
-        <div class="graph">
-            <canvas id="diskChart"></canvas>
-        </div> {% endcomment %}
+      </div>
+
+      <!-- DISK USAGE CARD -->
+      <div class="card">
+        <div class="card-title">Disk Usage</div>
+        <div class="percentage-label" id="diskValue">--%</div>
+        <div class="progress-bar">
+          <div class="progress-fill fill" id="diskBar"></div>
+        </div>
+      </div>
+
+    <!-- UPTIME CARD-->
+    <div class="card">
+      <div class="card-title">Uptime</div>
+      <div class="percentage-label" id="uptimeValue">--</div>
     </div>
 
+    </div>
+    <div class="big-graphs-container">
+      <!-- Big Resource usage over time graph-->
+      <div class="graph">
+        <div class="graph-title">CPU & Memory Usage Over Time</div>
+        <canvas id="systemUsageChart"></canvas>
+      </div>
+  </div>  
 
+  
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Data from Django context
-        var data = {{ data|safe }};
-        console.log(data);
-        var maxDataPoints = 10 * 60; // 10 minutes worth of data if updated every second
+      // Initialize the chart with data from context
+      const initialData = {{ data|safe }};
 
-        // Initialize the combined percentage chart
-        var percentChart = createCombinedPercentChart(
-            'percentChart', 
-            data.cpu_usage.timestamps, 
-            data.cpu_usage.values, 
-            data.memory_usage.values
-        );
+      const ctx = document.getElementById('systemUsageChart').getContext('2d');
 
-        // Initialize the other charts
-        var networkChart = createChartBytes(
-            'networkChart', 'Network I/O (MB)', data.network_io.timestamps, data.network_io.values, 'Bytes'
-        );
-        var diskChart = createChartBytes(
-            'diskChart', 'Disk I/O (MB)', data.disk_io.timestamps, data.disk_io.values, 'Bytes'
-        );
-
-        // Function to create a combined chart for CPU and Memory usage percentages
-        function createCombinedPercentChart(canvasId, dataLabels, cpuDataValues, memoryDataValues) {
-            var ctx = document.getElementById(canvasId).getContext('2d');
-            return new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dataLabels,
-                    datasets: [
-                        {
-                            label: 'CPU Usage (%)',
-                            data: cpuDataValues,
-                            backgroundColor: 'rgba(34, 129, 197, 0.1)', // Light color fill
-                            borderColor: 'rgba(34, 129, 197, 1)',     // Border color
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.1,
-                            pointRadius: 0
-                        },
-                        {
-                            label: 'Memory Usage (%)',
-                            data: memoryDataValues,
-                            backgroundColor: 'rgba(216, 112, 255, 0.1)', // Light color fill
-                            borderColor: 'rgba(216, 112, 255, 1)',     // Border color
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.1,
-                            pointRadius: 0
-                        }
-                    ]
-                },
-                options: {
-                    plugins: {
-                        title: { display: false, text: 'CPU and Memory Usage (%)' },
-                        legend: { display: true }
-                    },
-                scales: {
-                    x: { 
-                        display: true, 
-                        title: { display: false, text: 'Time' },
-                        grid: {
-                            color: (context) => context.index === 0 ? 'white': 'rgba(255,255,255,0.1)',
-                            borderDash: [5, 5], // Dashed grid lines
-                        },
-                    },
-                    y: { 
-                        title: { display: false, text: 'Usage (%)' }, 
-                        min: 0, 
-                        max:100, 
-                        grid: {
-                            color: (context) => context.index === 0 ? 'white' : 'rgba(255,255,255,0.1)', // White for the first vertical line
-                            borderDash: [5, 5], // Dashed grid lines
-                        },
-                    },
-                }
-                }
-            });
+      const systemUsageChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: initialData.cpu_usage.timestamps, // Initial Timestamps
+          datasets: [{
+            label: 'CPU Usage (%)',
+            data: initialData.cpu_usage.values,
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.3,
+            fill: true
+          },
+          {
+            label: 'Memory Usage (%)',
+            data: initialData.memory_usage.values,
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: {
+                display: false,
+                text: 'Percentage (%)',
+                color: '#cccccc'
+              },
+              grid: {
+                color: '#ffffff1f'
+              },
+              ticks: {
+                color: '#cccccc'
+              }
+            },
+            x: {
+              title: {
+                display: false,
+                text: 'Time',
+                color: '#cccccc'
+              },
+              grid: {
+                color: '#ffffff1f'
+              },
+              ticks: {
+                color: '#cccccc',
+                maxTicksLimit: 15
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#cccccc'
+              }
+            }
+          }
         }
+      });
 
-        // Function to fetch the latest data and update charts
-        function updateChart() {
-            fetch('{% url "latest_data" %}')
-                .then(response => response.json())
-                .then(latestData => {
-                    // Update the combined percent chart
-                    updatePercentChartData(
-                        percentChart, 
-                        latestData.cpu_usage.timestamp, 
-                        latestData.cpu_usage.value, 
-                        latestData.memory_usage.value
-                    );
-
-                    // Update other charts
-                    updateChartData(networkChart, latestData.network_io.timestamp, latestData.network_io.value);
-                    updateChartData(diskChart, latestData.disk_io.timestamp, latestData.disk_io.value);
-                })
-                .catch(error => console.error('Error fetching latest data:', error));
+      // Function to update the chart
+      function updateChart(cpuValue, memoryValue, timestamp) {
+        systemUsageChart.data.labels.push(timestamp);
+        systemUsageChart.data.datasets[0].data.push(cpuValue);
+        systemUsageChart.data.datasets[1].data.push(memoryValue);
+        
+        // Maintain only 15 data points
+        if (systemUsageChart.data.labels.length > 15) {
+          systemUsageChart.data.labels.shift();
+          systemUsageChart.data.datasets[0].data.shift();
+          systemUsageChart.data.datasets[1].data.shift();
         }
+        
+        systemUsageChart.update();
+      }
 
-        // Function to update the combined percent chart data
-        function updatePercentChartData(chart, newTimestamp, newCpuValue, newMemoryValue) {
-            chart.data.labels.push(newTimestamp);
-            chart.data.datasets[0].data.push(newCpuValue);
-            chart.data.datasets[1].data.push(newMemoryValue);
-
-            // Remove oldest data point if exceeding max data points
-            if (chart.data.labels.length > maxDataPoints) {
-                chart.data.labels.shift();
-                chart.data.datasets[0].data.shift();
-                chart.data.datasets[1].data.shift();
+      // Function to fetch latest data
+      function fetchLatestData() {
+        fetch("{% url 'latest_data' %}")
+          .then(response => response.json())
+          .then(data => {
+            // Update CPU Usage
+            if (data.cpu_usage) {
+              let cpuVal = data.cpu_usage.value;
+              let cpuUnit = data.cpu_usage.unit || '%';
+              document.getElementById('cpuValue').textContent = cpuVal + cpuUnit;
+              document.getElementById('cpuBar').style.width = cpuVal + '%';
             }
 
-            chart.update();
-        }
-
-        // Function to update chart data for single datasets
-        function updateChartData(chart, newTimestamp, newValue) {
-            chart.data.labels.push(newTimestamp);
-            chart.data.datasets[0].data.push(newValue);
-
-            // Remove oldest data point if exceeding max data points
-            if (chart.data.labels.length > maxDataPoints) {
-                chart.data.labels.shift();
-                chart.data.datasets[0].data.shift();
+            // Update Memory Usage
+            if (data.memory_usage) {
+              let memoryVal = data.memory_usage.value;
+              let memoryUnit = data.memory_usage.unit || '%';
+              document.getElementById('memoryValue').textContent = memoryVal + memoryUnit;
+              document.getElementById('memoryBar').style.width = memoryVal + '%';
             }
 
-            chart.update();
-        }
+            // Update Disk Usage
+            if (data.disk_space_available) {
+              let diskVal = data.disk_space_available.value;
+              let diskUnit = '%';
+              document.getElementById('diskValue').textContent = diskVal + diskUnit;
+              document.getElementById('diskBar').style.width = diskVal + '%';
+            }
 
-        // Update the chart every minute (60000 milliseconds)
-        setInterval(updateChart, 60000);
+            // Update Uptime
+            if (data.server_uptime) {
+              document.getElementById('uptimeValue').textContent = data.server_uptime.value;
+            }
 
+            // Update the chart with new data
+            if (data.cpu_usage && data.memory_usage) {
+              updateChart(data.cpu_usage.value, data.memory_usage.value, data.cpu_usage.timestamp);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching latest data:', error);
+          });
+      }
+
+      // Fetch data on page load and set interval
+      document.addEventListener('DOMContentLoaded', () => {
+        fetchLatestData();
+        setInterval(fetchLatestData, 60000); // Fetch every 5 seconds
+      });
     </script>
-</body>
-</html>
-
-
+  </body>
+</div>
 {% endblock %}
