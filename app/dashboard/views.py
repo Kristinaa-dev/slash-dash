@@ -288,7 +288,7 @@ def calculate_cpu_usage(stats):
 
 # DB TEST
 @login_required
-def dashboard(request):
+def dashboard2(request):
     # Define time range (last 10 minutes)
     end_time = timezone.now()
     start_time = end_time - datetime.timedelta(minutes=10)
@@ -314,20 +314,39 @@ def dashboard(request):
     context = {'data': data}
     return render(request, 'dashboard/index.html', context)
 
-def latest_data(request):
+def latest_data2(request):
+    from math import floor
     metrics = MetricType.objects.all()
-
     data = {}
+
     for metric in metrics:
-        # Get the latest data point for each metric
         latest_data_point = TimeSeriesData.objects.filter(
             metric_type=metric
         ).order_by('-timestamp').first()
 
         if latest_data_point:
+            value = latest_data_point.value
+            if metric.name == 'server_uptime':
+                total_seconds = int(value)
+                days = total_seconds // 86400
+                hours = (total_seconds % 86400) // 3600
+                minutes = (total_seconds % 3600) // 60
+                seconds = total_seconds % 60
+
+                if days > 0:
+                    display_value = f"{days}d {hours}h"
+                elif hours > 0:
+                    display_value = f"{hours}h {minutes}m"
+                elif minutes > 0:
+                    display_value = f"{minutes}m {seconds}s"
+                else:
+                    display_value = f"{seconds}s"
+            else:
+                display_value = value
+
             data[metric.name] = {
                 'timestamp': latest_data_point.timestamp.strftime("%H:%M"),
-                'value': latest_data_point.value,
+                'value': display_value,
                 'unit': metric.unit,
             }
 
@@ -405,3 +424,69 @@ def custom_login(request):
 def custom_logout(request):
     logout(request)
     return redirect('login')
+
+def dashboard(request):
+    end_time = timezone.now()
+    start_time = end_time - timezone.timedelta(minutes=15)  # Adjust as needed
+
+    metrics = MetricType.objects.filter(name__in=['cpu_usage', 'memory_usage'])
+
+    data = {}
+    for metric in metrics:
+        data_points = TimeSeriesData.objects.filter(
+            metric_type=metric,
+            timestamp__range=(start_time, end_time)
+        ).order_by('timestamp')[:15]  # Get last 15 points
+
+        data[metric.name] = {
+            'timestamps': [dp.timestamp.strftime("%H:%M") for dp in data_points],
+            'values': [dp.value for dp in data_points],
+            'unit': metric.unit,
+        }
+
+    context = {'data': data}
+    return render(request, 'dashboard/index.html', context)
+
+def latest_data(request):
+    from math import floor
+    metrics = MetricType.objects.all()
+    data = {}
+
+    for metric in metrics:
+        latest_data_point = TimeSeriesData.objects.filter(
+            metric_type=metric
+        ).order_by('-timestamp').first()
+
+        if latest_data_point:
+            value = latest_data_point.value
+            if metric.name == 'server_uptime':
+                total_seconds = int(value)
+                days = total_seconds // 86400
+                hours = (total_seconds % 86400) // 3600
+                minutes = (total_seconds % 3600) // 60
+                seconds = total_seconds % 60
+
+                if days > 0:
+                    display_value = f"{days}d {hours}h"
+                elif hours > 0:
+                    display_value = f"{hours}h {minutes}m"
+                elif minutes > 0:
+                    display_value = f"{minutes}m {seconds}s"
+                else:
+                    display_value = f"{seconds}s"
+            else:
+                display_value = value
+
+            if metric.name in ['cpu_usage', 'memory_usage']:
+                data[metric.name] = {
+                    'timestamp': latest_data_point.timestamp.strftime("%H:%M"),
+                    'value': display_value,
+                    'unit': metric.unit,
+                }
+            else:
+                data[metric.name] = {
+                    'value': display_value,
+                    'unit': metric.unit,
+                }
+
+    return JsonResponse(data)
