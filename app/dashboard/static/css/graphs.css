@@ -55,7 +55,12 @@
 	
 	/* background-color: var(--background-dark-secondary); */
 }
-
+.kvm-status-card{
+	background-color: var(--background-dark-secondary);
+	padding: 20px;
+	border-radius: 10px;
+	margin-top: 20px;
+}
 
 .main-content{
 	margin-bottom: 0px;
