@@ -56,7 +56,22 @@
       </div>
   </div>  
 
-  
+  <!-- Medium data display-->
+  <div class="mid-graphs-container">
+    <div class="kvm-status-card">
+        <h2 class="graph-title">KVM Virtual Machines</h2>
+        <ul class="vm-list">
+            {% for vm in vms %}
+            <li class="vm-item">
+                <span class="vm-name">{{ vm.name }}</span>
+                <span class="vm-status {{ vm.status|lower }}">
+                    {{ vm.status }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+  </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       // Initialize the chart with data from context
@@ -196,5 +211,5 @@
       });
     </script>
   </body>
-</div>
+
 {% endblock %}
