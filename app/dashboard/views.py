@@ -425,7 +425,7 @@ def custom_logout(request):
     logout(request)
     return redirect('login')
 
-def dashboard(request):
+def dashboard2(request):
     end_time = timezone.now()
     start_time = end_time - timezone.timedelta(minutes=15)  # Adjust as needed
 
@@ -445,6 +445,54 @@ def dashboard(request):
         }
 
     context = {'data': data}
+    return render(request, 'dashboard/index.html', context)
+
+
+import libvirt
+
+@login_required
+def dashboard(request):
+    end_time = timezone.now()
+    start_time = end_time - timezone.timedelta(minutes=15)  # Adjust as needed
+
+    # Fetch metrics data
+    metrics = MetricType.objects.filter(name__in=['cpu_usage', 'memory_usage'])
+
+    data = {}
+    for metric in metrics:
+        data_points = TimeSeriesData.objects.filter(
+            metric_type=metric,
+            timestamp__range=(start_time, end_time)
+        ).order_by('timestamp')[:15]  # Get last 15 points
+
+        data[metric.name] = {
+            'timestamps': [dp.timestamp.strftime("%H:%M") for dp in data_points],
+            'values': [dp.value for dp in data_points],
+            'unit': metric.unit,
+        }
+
+    # Fetch KVM VM status
+    vm_data = []
+    try:
+        conn = libvirt.open("qemu:///system")
+        if conn is None:
+            raise Exception("Failed to open connection to qemu:///system")
+        
+        # Get all domains (VMs)
+        domains = conn.listAllDomains()
+        
+        # Collect the first 3 VMs' data
+        for domain in domains[:3]:
+            vm_data.append({
+                'name': domain.name(),
+                'status': 'running' if domain.isActive() else 'stopped'
+            })
+        
+        conn.close()
+    except Exception as e:
+        vm_data = [{'name': 'Error', 'status': str(e)}]
+
+    context = {'data': data, 'vms': vm_data}
     return render(request, 'dashboard/index.html', context)
 
 def latest_data(request):
