@@ -6,11 +6,11 @@
     --warning-color-t: #eab20810;
     --alert-color: #F59E0B;
     --alert-color-t: #f59e0b10;
-    /* --negative: #EF4444; */
+    --negative: #EF4444;
     --error-color-t: #ef444410;
-    /* --positive: #22C55E; */
+    --positive: #22C55E;
     --debug-color-t: #22c55e10;
-    /* --middle: #3B82F6; */
+
 }
 
 * {
@@ -65,4 +65,43 @@ body {
 .docker-table {
     width: 100%;
     border-collapse: collapse;
+}
+
+
+
+.info-button {
+    font-weight: bold;
+    border-radius: 25px;
+    color: white;
+    display: inline-block;
+    text-align: center;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    min-width: 80px;
+}
+
+/* Status Colors */
+.info-button.running {
+    background-color: var(--positive);
+}
+
+.info-button.stopped {
+    background-color: var(--negative);
+}
+
+.info-button.paused {
+    background-color: var(--alert-color);
+}
+
+.info-button.unknown {
+    background-color: var(--negative);
+}
+.cont-name{
+    font-weight: bold;
+}
+.item{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    padding: 10px 20px;
 }
