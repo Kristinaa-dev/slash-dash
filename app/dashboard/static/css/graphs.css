@@ -51,11 +51,12 @@
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	/* grid-template-rows: repeat(2, 200px); */
-	gap: 20px
-	
+	gap: 20px;
+	/* I would like to take up all the space available */
+	min-height: 27%;
 	/* background-color: var(--background-dark-secondary); */
 }
-.kvm-status-card{
+.status-card{
 	background-color: var(--background-dark-secondary);
 	padding: 20px;
 	border-radius: 10px;
