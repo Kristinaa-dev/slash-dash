@@ -449,11 +449,32 @@ def dashboard2(request):
 
 
 import libvirt
+import subprocess
+
+def check_service_status(service_name):
+    try:
+        # Run a systemctl command to check the service status
+        result = subprocess.run(
+            ['systemctl', 'is-active', service_name],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:  # Service is running
+            return 'running'
+        elif result.returncode == 3:  # Service is stopped
+            return 'stopped'
+        else:
+            return 'unknown'
+    except Exception as e:
+        return 'error'
+
+
+
 
 @login_required
 def dashboard(request):
     end_time = timezone.now()
-    start_time = end_time - timezone.timedelta(minutes=15)  # Adjust as needed
+    start_time = end_time - timezone.timedelta(minutes=15)
 
     # Fetch metrics data
     metrics = MetricType.objects.filter(name__in=['cpu_usage', 'memory_usage'])
@@ -463,7 +484,7 @@ def dashboard(request):
         data_points = TimeSeriesData.objects.filter(
             metric_type=metric,
             timestamp__range=(start_time, end_time)
-        ).order_by('timestamp')[:15]  # Get last 15 points
+        ).order_by('timestamp')[:15]
 
         data[metric.name] = {
             'timestamps': [dp.timestamp.strftime("%H:%M") for dp in data_points],
@@ -478,21 +499,29 @@ def dashboard(request):
         if conn is None:
             raise Exception("Failed to open connection to qemu:///system")
         
-        # Get all domains (VMs)
         domains = conn.listAllDomains()
-        
-        # Collect the first 3 VMs' data
         for domain in domains[:3]:
             vm_data.append({
                 'name': domain.name(),
                 'status': 'running' if domain.isActive() else 'stopped'
             })
-        
         conn.close()
     except Exception as e:
         vm_data = [{'name': 'Error', 'status': str(e)}]
 
-    context = {'data': data, 'vms': vm_data}
+    # Check NGINX and Apache status
+    nginx_status = check_service_status('nginx')
+    apache_status = check_service_status('apache2')  # Use 'httpd' for Red Hat-based distros
+    postgres_status = check_service_status('postgresql')
+    context = {
+        'data': data,
+        'vms': vm_data,
+        'services': {
+            'nginx': nginx_status,
+            'apache': apache_status,
+            'postgres': postgres_status,
+        }
+    }
     return render(request, 'dashboard/index.html', context)
 
 def latest_data(request):
