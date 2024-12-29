@@ -41,37 +41,71 @@
         </div>
       </div>
 
-    <!-- UPTIME CARD-->
-    <div class="card">
-      <div class="card-title">Uptime</div>
-      <div class="percentage-label" id="uptimeValue">--</div>
-    </div>
-
+      <!-- UPTIME CARD -->
+      <div class="card">
+        <div class="card-title">Uptime</div>
+        <div class="percentage-label" id="uptimeValue">--</div>
+      </div>
     </div>
     <div class="big-graphs-container">
-      <!-- Big Resource usage over time graph-->
+      <!-- Big Resource usage over time graph -->
       <div class="graph">
-        <div class="graph-title">CPU & Memory Usage Over Time</div>
+        <h2 class="graph-title">CPU & Memory Usage Over Time</h2>
         <canvas id="systemUsageChart"></canvas>
       </div>
-  </div>  
 
-  <!-- Medium data display-->
-  <div class="mid-graphs-container">
-    <div class="kvm-status-card">
-        <h2 class="graph-title">KVM Virtual Machines</h2>
-        <ul class="vm-list">
-            {% for vm in vms %}
-            <li class="vm-item">
-                <span class="vm-name">{{ vm.name }}</span>
-                <span class="vm-status {{ vm.status|lower }}">
-                    {{ vm.status }}
-                </span>
-            </li>
-            {% endfor %}
-        </ul>
+      <div>
+          <div class="graph">
+
+            <h2 class="graph-title">Docker Summary</h2>
+          </div>
+      </div>
+
+
     </div>
-  </div>
+
+    <!-- Medium data display -->
+    <div class="mid-graphs-container">
+      <div class="status-card">
+        <h2 class="graph-title">KVM Virtual Machines</h2>
+        <ul class="list">
+          {% for vm in vms %}
+            <li class="item">
+              <div class="vm-name">{{ vm.name }}</div>
+              <div class="status info-button {{ vm.status|lower }} ">{{ vm.status|capfirst }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="status-card">
+        <h2 class="graph-title">Web Server Status</h2>
+
+        <ul class="list">
+          <li class="item">
+            <span class="service-name">Nginx</span>
+            <span class="service-status info-button {{ services.nginx|lower }}">{{ services.nginx }}</span>
+          </li>
+          <li class="item">
+            <span class="service-name">Apache</span>
+            <span class="service-status info-button {{ services.apache|lower }}">{{ services.apache }}</span>
+          </li>
+          <li class="item">
+            <span class="service-name">PostgreSQL</span>
+            <span class="service-status info-button {{ services.postgres|lower }}">{{ services.postgres }}</span>
+
+
+          </li>
+        </ul>
+      </div>
+
+      <div class="status-card">
+        <h2 class="graph-title">Alerts</h2>
+
+      </div>
+    </div>
+
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       // Initialize the chart with data from context
@@ -211,5 +245,4 @@
       });
     </script>
   </body>
-
 {% endblock %}
