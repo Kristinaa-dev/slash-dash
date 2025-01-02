@@ -10,10 +10,13 @@
 .graph-title{
 	color: white;
 	font-size: 24px;
-    padding-top: 20px;
+    /* padding-top: 20px; */
     padding-bottom: 10px;
 	font-weight: 600;
 } 
+.padded-title{
+	padding-top: 20px;
+}
 
 
 .small-graphs-container{
