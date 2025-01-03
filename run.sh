@@ -5,7 +5,7 @@ sudo systemctl start postgresql
 sudo systemctl start redis-server
 
 # Activate your virtual environment
-source myenv/bin/activate
+source venv/bin/activate
 
 # Navigate to your app directory
 cd app
