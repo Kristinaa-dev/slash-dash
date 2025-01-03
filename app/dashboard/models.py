@@ -40,5 +40,24 @@ class LogEntry(models.Model):
     def __str__(self):
         return f"[{self.timestamp}] {self.service}: {self.message[:50]}"
 
+class Node(models.Model):
+    """
+    Represents an agent node with minimal tracking info.
+    """
+    name = models.CharField(max_length=100, help_text="A friendly name for the node")
+    ip_address = models.GenericIPAddressField(help_text="The IP address of the agent")
+    status = models.CharField(max_length=10, default='offline',
+                              help_text="Possible values: online/offline/revoked")
+    last_check_in = models.DateTimeField(null=True, blank=True, help_text="Last time the agent responded")
+    access_token = models.CharField(max_length=255, blank=True, help_text="Token used for Bearer auth")
+
+    def __str__(self):
+        return f"{self.name} ({self.ip_address})"
+
+
+
+
+
+
 #TODO: finish later consult with chatgpt have to rewrite the 
 #      whole log collection and storage
