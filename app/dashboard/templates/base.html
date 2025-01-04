@@ -7,7 +7,6 @@
     <title>{% block title %}My Django App{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script defer src="{% static 'js/sidebar.js' %}"></script>
 </head>
 <body>
     <div class="container">
@@ -23,7 +22,7 @@
                 <li><a href="{% url 'terminal' %}"><i class="fas fa-terminal icon"></i><span class="text">Terminal</span></a></li>
                 {% endif %}
                 <li><a href="{% url 'logs' %}"><i class="fas fa-file-alt icon"></i><span class="text">Logs</span></a></li>
-                <li><a href="#"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
+                <li><a href="{% url 'admin:index' %}"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
             </ul>
             <!-- Logout at the bottom -->
             <div class="logout">
