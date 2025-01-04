@@ -29,7 +29,7 @@ a {
 #sidebar {
     width: var(--sidebar-width);
     background-color: var(--background-dark-secondary);
-    transition: width var(--transition-speed);
+    transition: width var(--transition-speed) ease, padding var(--transition-speed) ease;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -38,6 +38,55 @@ a {
 
 #sidebar.expanded {
     width: var(--sidebar-expanded-width);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 10px;
+    padding-right: 10px;
+    transition: width var(--transition-speed) ease, padding var(--transition-speed) ease;
+}
+
+#sidebar.expanded a {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+}
+
+#sidebar.expanded a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+#sidebar.expanded a .icon {
+    width: 30px;
+    margin-right: 10px;
+    text-align: center;
+}
+
+#sidebar.expanded a .text {
+    flex: 1;
+    font-size: 1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#sidebar.expanded a {
+    justify-content: flex-start;
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+}
+
+#sidebar.expanded a .icon {
+    width: 30px; /* fixed width for icons */
+    text-align: center;
+}
+
+#sidebar.expanded a .text {
+    margin-left: 10px; /* extra padding for text */
+    flex: 1;          /* lets text line up uniformly */
 }
 
 #sidebar .icon {
@@ -53,6 +102,14 @@ a {
 }
 
 #sidebar.expanded .text {
+    display: inline;
+}
+
+.side-panel.collapsed .text {
+    display: none;
+}
+
+.side-panel.expanded .text {
     display: inline;
 }
 
