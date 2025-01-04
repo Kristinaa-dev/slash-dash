@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agent Nodes</title>
+</head>
+<body>
+    <h1>List of Agent Nodes</h1>
+
+    <!-- Link to logout for convenience -->
+    <p><a href="{% url 'logout' %}">Logout</a></p>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Name</th>
+            <th>IP Address</th>
+            <th>Status</th>
+            <th>Last Check-In</th>
+        </tr>
+        {% for node in nodes %}
+        <tr>
+            <td>{{ node.name }}</td>
+            <td>{{ node.ip_address }}</td>
+            <td>{{ node.status }}</td>
+            <td>
+                {% if node.last_check_in %}
+                    {{ node.last_check_in|date:"Y-m-d H:i:s" }}
+                {% else %}
+                    Never
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
