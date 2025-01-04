@@ -569,73 +569,35 @@ def latest_data(request):
     return JsonResponse(data)
 
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 import requests
 
 from .models import Node
 
+@login_required  # require login to see this page
 def node_list(request):
     """
     Displays all agent nodes in a simple table.
-    For demonstration, it tries to ping each node and update status.
+    Tries to ping each node at /ping to update online/offline status.
     """
     nodes = Node.objects.all()
 
     for node in nodes:
-        # Attempt to ping each node. This is just an example – in reality,
-        # you might schedule a background task (e.g., Celery) to do health checks.
         try:
-            headers = {
-                "Authorization": f"Bearer {node.access_token}"
-            }
-            response = requests.get(f"http://{node.ip_address}:5000/ping", headers=headers, timeout=2)
+            response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
             if response.status_code == 200:
-                resp_data = response.json()
+                # If ping returns OK
                 node.status = "online"
                 node.last_check_in = timezone.now()
             else:
-                # If it's a 403 or 401, we can mark it accordingly
-                if response.status_code == 403:
-                    node.status = "revoked"
-                else:
-                    node.status = "offline"
+                # If the agent returns another status code
+                node.status = "offline"
         except requests.exceptions.RequestException:
+            # Could be a timeout or connection error
             node.status = "offline"
 
         node.save()
 
     return render(request, "node_list.html", {"nodes": nodes})
-
-
-def add_node_through_ssh(request):
-    """
-    This is just a placeholder to demonstrate how you *might* do an SSH-based setup.
-    - In production, you'd gather SSH credentials (username, password/key) from the user
-      via a form.
-    - Use `paramiko` or `fabric` to SSH onto the target machine.
-    - Install Python, set up a virtual environment, copy your agent code, start it up.
-    - You might then store the new node's IP and generated token in the database.
-    """
-    # Pseudocode (not functional):
-    # if request.method == "POST":
-    #     ip = request.POST['ip']
-    #     username = request.POST['ssh_username']
-    #     ssh_key = request.POST['ssh_key']
-    #
-    #     # Use paramiko or fabric to do the following:
-    #     # 1. SSH to the machine
-    #     # 2. Install/verify Python, pip, etc.
-    #     # 3. Transfer the agent_app code
-    #     # 4. Run "pip install -r requirements.txt"
-    #     # 5. Run "python agent.py"
-    #     # 6. Possibly retrieve or create the SECRET_TOKEN
-    #
-    #     # Store node in DB
-    #     node = Node.objects.create(
-    #         name="NewAgentNode",
-    #         ip_address=ip,
-    #         access_token="SOME_GENERATED_TOKEN"
-    #     )
-    #     return redirect("node_list")
-    #
-    # return render(request, "add_node_form.html", {})
-    pass
