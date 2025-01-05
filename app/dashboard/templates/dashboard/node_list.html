@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Agent Nodes
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/graphs.css' %}">
+<link rel="stylesheet" href="{% static 'css/nodes.css' %}">
+    <h2 class="title">/dash/nodes</h2>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Node Card</title>
+    </head>
+    <body>
+    
+      <div class="node-card">
+        <!-- Header Section -->
+        <div class="card-header">
+          <h2>Control Node</h2>
+          <p>Najlepsi node na svete</p>
+        </div>
+    
+        <!-- Status / IP Row -->
+        <div class="status-row">
+          <p>
+            Status: <span class="status-online">Online</span>
+          </p>
+          <p>IP: 192.168.0.1</p>
+        </div>
+    
+        <!-- Info Grid (Uptime, Last ping, Connected nodes, Online nodes) -->
+        <div class="info-grid">
+          <div class="info-box">
+            <div class="label">Uptime</div>
+            <div class="value">5d 12h 30m</div>
+          </div>
+          <div class="info-box">
+            <div class="label">Last ping</div>
+            <div class="value">2 min ago</div>
+          </div>
+          <div class="info-box">
+            <div class="label">Connected nodes</div>
+            <div class="value">4</div>
+          </div>
+          <div class="info-box last">
+            <div class="label">Online nodes</div>
+            <div class="value">4</div>
+          </div>
+        </div>
+      </div>
+    
+    </body>
+    </html>
+    
+
+{% endblock %}
+
+
