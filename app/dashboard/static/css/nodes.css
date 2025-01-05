@@ -1,0 +1,91 @@
+:root {
+    --background-dark: #0c0d11;
+    --background-dark-secondary: #15161a;
+    --text-color: #ffffff;
+    --text-color-time: #ffffffda;
+    --text-gray: #888;
+	--info-color: #3B82F6;
+    --info-color-t: #3b82f610;
+	--warning-color: #EAB308;
+    --warning-color-t: #eab20810;
+    --alert-color: #F59E0B;
+    --alert-color-t: #f59e0b10;
+	--error-color: #EF4444;
+    --error-color-t: #ef444410;
+	--debug-color: #22C55E;
+    --debug-color-t: #22c55e10;
+}
+
+
+
+
+.node-card {
+	background-color: var(--background-dark-secondary);
+	/* Card background */
+	border-radius: 8px;
+	padding: 1.5rem;
+}
+
+/* Header area */
+.card-header {
+	margin-bottom: 1rem;
+}
+
+.card-header h2 {
+	font-size: 1rem;
+	color: #cccccc;
+	margin-bottom: 0.25rem;
+}
+
+.card-header p {
+	font-size: 2rem;
+	font-weight: bold;
+	color: #ffffff;
+}
+
+/* Status row: "Status: Online" and "IP" */
+.status-row {
+	flex-wrap: wrap;
+	align-items: center;
+	/* gap: 2rem; */
+	margin-bottom: 1.5rem;
+}
+
+.status-row p {
+	font-size: 1.1rem;
+	color: #cccccc;
+}
+
+.status-row .status-online {
+	color: #27ae60;
+	/* Green color for "Online" */
+	font-weight: bold;
+}
+
+/* Info grid for Uptime, Last ping, etc. */
+.info-grid {
+	/* display: grid; */
+	/* grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); */
+	gap: 1.5rem;
+	display: flex;
+	justify-content: space-between;
+}
+
+.info-box {
+	text-align: left;
+}
+
+.info-box .label {
+	font-size: 1.2rem;
+	color: #aaaaaa;
+	margin-bottom: 0.3rem;
+}
+
+.info-box .value {
+	font-size: 1.4rem;
+	font-weight: bold;
+	color: #ffffff;
+}
+.last{
+	margin-right: 2	rem;	
+}
