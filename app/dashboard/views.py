@@ -600,4 +600,4 @@ def node_list(request):
 
         node.save()
 
-    return render(request, "node_list.html", {"nodes": nodes})
+    return render(request, "dashboard/node_list.html", {"nodes": nodes})
