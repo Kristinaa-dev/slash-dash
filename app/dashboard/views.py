@@ -575,6 +575,7 @@ from django.utils import timezone
 import requests
 
 from .models import Node
+from .system_data import retrieve_system_data
 
 @login_required  # require login to see this page
 def node_list(request):
@@ -599,5 +600,10 @@ def node_list(request):
             node.status = "offline"
 
         node.save()
+    node_data = retrieve_system_data()
+    context = {
+        "node_data": node_data,
+    }
 
-    return render(request, "dashboard/node_list.html", {"nodes": nodes})
+
+    return render(request, "dashboard/node_list.html", context)
