@@ -42,13 +42,26 @@ class LogEntry(models.Model):
 
 
 class Node(models.Model):
-    """
-    Represents an agent node with minimal tracking info.
-    """
+    NODE_TYPE_CHOICES = [
+        ('Control', 'Control'),
+        ('Agent', 'Agent'),
+        ('Database', 'Database'),
+    ]
+
+    TYPE_LOCATION_CHOICES = [
+        ('Europe', 'Europe'),
+        ('US East', 'US East'),
+        ('US West', 'US West'),
+    ]
+
     name = models.CharField(max_length=100, help_text="A friendly name for the node")
     ip_address = models.GenericIPAddressField(help_text="The IP address (or domain) of the agent")
+    node_type = models.CharField(max_length=50, choices=NODE_TYPE_CHOICES, help_text="Type of node")
+    location = models.CharField(max_length=50, choices=TYPE_LOCATION_CHOICES, help_text="Node location")
+    ssh_username = models.CharField(max_length=100, help_text="SSH username")
+    ssh_password = models.CharField(max_length=100, help_text="SSH password")
     status = models.CharField(max_length=10, default='offline', help_text="online/offline")
-    last_check_in = models.DateTimeField(null=True, blank=True, help_text="Last time the agent responded")
+    last_check_in = models.DateTimeField(null=True, blank=True, help_text="Last time the node responded")
 
     def __str__(self):
         return f"{self.name} ({self.ip_address})"

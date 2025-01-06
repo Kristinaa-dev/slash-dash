@@ -14,8 +14,10 @@ urlpatterns = [
     
     path('login/', views.custom_login, name='login'),
     path('logout/', views.custom_logout, name='logout'),
-    path("nodes/", views.node_list, name="node_list"),
+    
     path('get-docker-stats/', views.get_docker_stats, name='get_docker_stats'),
-
+    
+    path("nodes/", views.node_list, name="node_list"),
+    path("nodes/add", views.add_node, name="add_node"),
 ]
 

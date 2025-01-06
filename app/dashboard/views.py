@@ -59,9 +59,7 @@ client = docker.from_env()
 
 # Docker monitor view
 
-#TODO: Loading takes 5 sec need to optimize 
-# The slow down is in the for loop
-# The stats = container.stats(stream=False) is the slowest part
+
 
 from django.core.cache import cache
 import concurrent.futures
@@ -206,15 +204,13 @@ def format_ports(ports_dict):
 
 def format_uptime(started_at):
     try:
-        # Parse the ISO8601 timestamp
         started_time = datetime.strptime(started_at.split(".")[0], "%Y-%m-%dT%H:%M:%S")
-        started_time = started_time.replace(tzinfo=None)  # Ensure timezone compatibility
+        started_time = started_time.replace(tzinfo=None)
         now_time = datetime.utcnow()
 
-        # Calculate the difference
+
         delta = now_time - started_time
 
-        # Convert to days, hours, or minutes
         if delta.days > 0:
             return f"{delta.days} days"
         elif delta.seconds >= 3600:
@@ -583,23 +579,23 @@ def node_list(request):
     Displays all agent nodes in a simple table.
     Tries to ping each node at /ping to update online/offline status.
     """
-    nodes = Node.objects.all()
+    # nodes = Node.objects.all()
 
-    for node in nodes:
-        try:
-            response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
-            if response.status_code == 200:
-                # If ping returns OK
-                node.status = "online"
-                node.last_check_in = timezone.now()
-            else:
-                # If the agent returns another status code
-                node.status = "offline"
-        except requests.exceptions.RequestException:
-            # Could be a timeout or connection error
-            node.status = "offline"
+    # for node in nodes:
+    #     try:
+    #         response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
+    #         if response.status_code == 200:
+    #             # If ping returns OK
+    #             node.status = "online"
+    #             node.last_check_in = timezone.now()
+    #         else:
+    #             # If the agent returns another status code
+    #             node.status = "offline"
+    #     except requests.exceptions.RequestException:
+    #         # Could be a timeout or connection error
+    #         node.status = "offline"
 
-        node.save()
+    #     node.save()
     node_data = retrieve_system_data()
     context = {
         "node_data": node_data,
@@ -607,3 +603,35 @@ def node_list(request):
 
 
     return render(request, "dashboard/node_list.html", context)
+
+
+
+import paramiko
+from django.shortcuts import render, redirect
+from .forms import NodeForm
+from .models import Node
+
+def add_node(request):
+    if request.method == 'POST':
+        form = NodeForm(request.POST)
+        if form.is_valid():
+            node = form.save(commit=False)
+            if test_ssh_connection(node.ip_address, node.ssh_username, node.ssh_password):
+                node.status = 'online'
+            else:
+                node.status = 'offline'
+            node.save()
+            return redirect('dashboard')
+    else:
+        form = NodeForm()
+    return render(request, 'dashboard/add_node.html', {'form': form})
+
+def test_ssh_connection(ip, username, password):
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password)
+        ssh.close()
+        return True
+    except Exception as e:
+        return False
