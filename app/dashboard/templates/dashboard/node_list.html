@@ -18,7 +18,7 @@
     </head>
     <body>
     
-      <div class="node-card">
+      <div class="node-cont">
         <!-- Header Section -->
         <div class="card-header">
           <h2>Control Node</h2>
@@ -53,11 +53,170 @@
           </div>
         </div>
       </div>
-    
-    </body>
-    </html>
-    
+      
+      {% comment %} <h2 class="sub-title">Agent Nodes</h2> {% endcomment %}
 
+
+
+
+
+
+<div>
+
+  <div class="dashboard">
+    <!-- Left Column: Server Nodes -->
+    <div class="server-nodes">
+      <!-- Header with title and filters -->
+      <div class="nodes-header">
+        <h2 class="header-title">Connected Nodes</h2>
+        <div class="filters">
+          <select>
+            <option>Filter by status</option>
+            <option>Online</option>
+            <option>Offline</option>
+          </select>
+          <select>
+            <option>Filter by type</option>
+            <option>Control</option>
+            <option>Agent</option>
+            <option>Database</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Node List -->
+      <div class="node-list">
+        <!-- Example Card 1 -->
+        <div class="node-card">
+          <div class="node-card-header">
+            <div>
+              <span class="status-badge online">online</span>
+              <span class="type-badge control">control</span>
+            </div>
+            <button class="menu-btn">•••</button>
+          </div>
+          <div class="node-info">
+            <h3>Control-1</h3>
+            <p>192.168.0.1</p>
+            <p>US East</p>
+          </div>
+          <div class="usage-bars">
+            <div class="usage-row">
+              <span class="usage-label">CPU</span>
+              <div class="bar">
+                <span class="fill cpu"></span>
+              </div>
+            </div>
+            <div class="usage-row">
+              <span class="usage-label">Mem</span>
+              <div class="bar">
+                <span class="fill mem"></span>
+              </div>
+            </div>
+            <div class="usage-row">
+              <span class="usage-label">Disk</span>
+              <div class="bar">
+                <span class="fill disk"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Example Card 2 -->
+        <div class="node-card">
+          <div class="node-card-header">
+            <div>
+              <span class="status-badge offline">offline</span>
+              <span class="type-badge agent">agent</span>
+            </div>
+            <button class="menu-btn">•••</button>
+          </div>
+          <div class="node-info">
+            <h3>Agent-1</h3>
+            <p>192.168.1.1</p>
+            <p>US East</p>
+          </div>
+          <div class="usage-bars">
+            <div class="usage-row">
+              <span class="usage-label">CPU</span>
+              <div class="bar">
+                <span class="fill cpu" style="width: 30%;"></span>
+              </div>
+            </div>
+            <div class="usage-row">
+              <span class="usage-label">Mem</span>
+              <div class="bar">
+                <span class="fill mem" style="width: 20%;"></span>
+              </div>
+            </div>
+            <div class="usage-row">
+              <span class="usage-label">Disk</span>
+              <div class="bar">
+                <span class="fill disk" style="width: 80%;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Example Card 3 -->
+        <div class="node-card">
+          <div class="node-card-header">
+            <div>
+              <span class="status-badge online">online</span>
+              <span class="type-badge database">database</span>
+            </div>
+            <button class="menu-btn">•••</button>
+          </div>
+          <div class="node-info">
+            <h3>DB-1</h3>
+            <p>192.168.1.2</p>
+            <p>US West</p>
+          </div>
+          <div class="usage-bars">
+            <div class="usage-row">
+              <span class="usage-label">CPU</span>
+              <div class="bar">
+                <span class="fill cpu" style="width: 45%;"></span>
+              </div>
+            </div>
+            <div class="usage-row">
+              <span class="usage-label">Mem</span>
+              <div class="bar">
+                <span class="fill mem" style="width: 65%;"></span>
+              </div>
+            </div>
+            <div class="usage-row">
+              <span class="usage-label">Disk</span>
+              <div class="bar">
+                <span class="fill disk" style="width: 25%;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: System Alerts -->
+    <div class="system-alerts">
+      <h3>Nodes Management</h3>
+
+      <div class="alert">
+        <p>High CPU usage on Web-2</p>
+        <span>2023-05-01 14:30:00</span>
+      </div>
+      <div class="alert">
+        <p>Low disk space on DB-1</p>
+        <span>2023-05-01 15:45:00</span>
+      </div>
+      <div class="alert">
+        <p>Scheduled maintenance in 2 days</p>
+        <span>2023-05-01 16:00:00</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
 {% endblock %}
 
 
