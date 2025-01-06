@@ -1,25 +1,26 @@
 :root {
-    --background-dark: #0c0d11;
-    --background-dark-secondary: #15161a;
-    --text-color: #ffffff;
-    --text-color-time: #ffffffda;
-    --text-gray: #888;
+	--background-dark: #0c0d11;
+	--background-dark-secondary: #15161a;
+	--background-dark-terciary: #1e1f26;
+	--text-color: #ffffff;
+	--text-color-time: #ffffffda;
+	--text-gray: #888;
 	--info-color: #3B82F6;
-    --info-color-t: #3b82f610;
+	--info-color-t: #3b82f610;
 	--warning-color: #EAB308;
-    --warning-color-t: #eab20810;
-    --alert-color: #F59E0B;
-    --alert-color-t: #f59e0b10;
+	--warning-color-t: #eab20810;
+	--alert-color: #F59E0B;
+	--alert-color-t: #f59e0b10;
 	--error-color: #EF4444;
-    --error-color-t: #ef444410;
+	--error-color-t: #ef444410;
 	--debug-color: #22C55E;
-    --debug-color-t: #22c55e10;
+	--debug-color-t: #22c55e10;
 }
 
 
 
 
-.node-card {
+.node-cont {
 	background-color: var(--background-dark-secondary);
 	/* Card background */
 	border-radius: 8px;
@@ -86,6 +87,238 @@
 	font-weight: bold;
 	color: #ffffff;
 }
-.last{
-	margin-right: 2	rem;	
+
+.last {
+	margin-right: 2 rem;
+}
+
+
+
+/* Main container: two columns (left for the node list, right for system alerts) */
+.dashboard {
+	display: grid;
+	grid-template-columns: 3fr 1.2fr;
+	/* Adjust column widths as needed */
+	gap: 20px;
+	margin-top: 20px;
+	height: 62vh;
+}
+
+/* Left column (Server Nodes) */
+.server-nodes {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+/* Header area above the cards (title + filters) */
+.nodes-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.header-title {
+	font-size: 1.6rem;
+	font-weight: 600;
+	margin-left: 25px;
+
+}
+
+.filters {
+	display: flex;
+	gap: 10px;
+}
+
+.filters select {
+	background-color: var(--background-dark-secondary);
+	color: #fff;
+	border: 1px solid #333; /* Darker border */
+	padding: 6px 10px;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+/* Node list area (cards) */
+.node-list {
+	display: flex;
+	flex-wrap: wrap;
+	/* Let them wrap if screen is narrow */
+	/* gap: 20px; */
+	justify-content: space-between;
+}
+
+/* Each node card */
+.node-card {
+	background-color: var(--background-dark-secondary);
+	border-radius: 8px;
+	padding: 16px;
+	/* width: 25.98rem; */
+	width: calc(100% / 3 - 15px);
+
+	/* Set a fixed width or use responsive sizing */
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+	position: relative;
+}
+
+
+
+/* Top row in the card: Node name, status, type label, etc. */
+.node-card-header {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 10px;
+}
+
+/* Example status badges */
+.status-badge {
+	font-size: 0.75rem;
+	padding: 3px 6px;
+	border-radius: 4px;
+	text-transform: uppercase;
+	font-weight: bold;
+	margin-right: 8px;
+}
+
+.online {
+	background-color: var(--debug-color);
+	/* Green */
+}
+
+.offline {
+	background-color: var(--error-color);
+	/* Red */
+}
+
+/* Example type badges */
+.type-badge {
+	font-size: 0.75rem;
+	padding: 3px 6px;
+	border-radius: 4px;
+	text-transform: uppercase;
+	font-weight: bold;
+	margin-right: 8px;
+}
+
+.control {
+	background-color: #ab47bc;
+	/* Purple */
+}
+
+.agent {
+	background-color: var(--info-color);
+	/* Blue */
+}
+
+.database {
+	background-color: var(--debug-color);
+	/* Green */
+}
+
+/* The node name/IP/region info */
+.node-info h3 {
+	font-size: 1.15rem;
+	margin-bottom: 4px;
+}
+
+.node-info p {
+	font-size: 0.9rem;
+	line-height: 1.4;
+	color: #ccc;
+}
+
+/* The usage bars container */
+.usage-bars {
+	margin-top: 10px;
+}
+
+/* Each usage bar row */
+.usage-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 6px;
+}
+
+.usage-label {
+	flex: 0 0 40px;
+	font-size: 0.8rem;
+	color: #aaa;
+}
+
+.bar {
+	flex: 1;
+	height: 8px;
+	background-color: #333;
+	border-radius: 4px;
+	margin-left: 8px;
+	overflow: hidden;
+	position: relative;
+}
+
+/* Colored fill inside the bar */
+.fill {
+	display: block;
+	height: 100%;
+}
+
+.fill.cpu {
+	background-color: #3f51b5;
+	/* Blue-ish */
+	width: 60%;
+	/* Example usage */
+}
+
+.fill.mem {
+	background-color: #00bfa5;
+	/* Teal */
+	width: 40%;
+	/* Example usage */
+}
+
+.fill.disk {
+	background-color: #ff9800;
+	/* Orange */
+	width: 75%;
+	/* Example usage */
+}
+
+/* Three-dot menu style (purely cosmetic in this example) */
+.menu-btn {
+	background: none;
+	border: none;
+	color: #aaa;
+	font-size: 1.2rem;
+	cursor: pointer;
+}
+
+/* Right column: System alerts */
+.system-alerts {
+	background-color: var(--background-dark-secondary);
+	padding: 16px;
+	border-radius: 8px;
+}
+
+.system-alerts h3 {
+	font-size: 1.2rem;
+	margin-bottom: 16px;
+}
+
+/* Individual alerts */
+.alert {
+	display: flex;
+	flex-direction: column;
+	background-color: var(--background-dark-terciary);
+	border-radius: 6px;
+	padding: 12px;
+	margin-bottom: 12px;
+}
+
+.alert p {
+	margin-bottom: 4px;
+	font-weight: 500;
+}
+
+.alert span {
+	font-size: 0.8rem;
+	color: #ccc;
 }
