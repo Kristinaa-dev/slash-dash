@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 <link rel="stylesheet" href="{% static 'css/graphs.css' %}">
 <link rel="stylesheet" href="{% static 'css/nodes.css' %}">
+<link rel="stylesheet" href="{% static 'css/modal.css' %}">
     <h2 class="title">/dash/nodes</h2>
     <!DOCTYPE html>
     <html lang="en">
@@ -17,7 +18,25 @@
       <title>Node Card</title>
     </head>
     <body>
-    
+    <script>
+      function openModal() {
+        document.getElementById("addNodeModal").style.display = "block";
+      }
+      
+      // Function to close the modal
+      function closeModal() {
+        document.getElementById("addNodeModal").style.display = "none";
+      }
+      
+      // Close the modal when clicking outside the modal content
+      window.onclick = function (event) {
+        if (event.target == document.getElementById("addNodeModal")) {
+          closeModal();
+        }
+      };
+    </script>
+
+
       <div class="node-cont">
         <!-- Header Section -->
         <div class="card-header">
@@ -230,6 +249,56 @@
     </div>
   </div>
 
+</div>
+<!-- Add Node Button -->
+<button class="add-node-btn" onclick="openModal()">
+  <span class="icon-plus">+</span>
+  Add Node
+</button>
+
+<!-- Modal -->
+<div id="addNodeModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <h2 class="modal-title">Add New Node</h2>
+    <p class="modal-description">Enter the details of the new server node you want to add to the dashboard.</p>
+    <form method="POST" action="{% url 'add_node' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="name">Node Name:</label>
+        <input type="text" id="name" name="name" placeholder="server-1" required>
+      </div>
+      <div class="form-group">
+        <label for="ip_address">IP Address:</label>
+        <input type="text" id="ip_address" name="ip_address" placeholder="192.168.1.10" required>
+      </div>
+      <div class="form-group">
+        <label for="node_type">Type:</label>
+        <select id="node_type" name="node_type" required>
+          <option value="Control">Control</option>
+          <option value="Agent">Agent</option>
+          <option value="Database">Database</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="location">Location:</label>
+        <select id="location" name="location" required>
+          <option value="Europe">Europe</option>
+          <option value="US East">US East</option>
+          <option value="US West">US West</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="ssh_username">Username:</label>
+        <input type="text" id="ssh_username" name="ssh_username" placeholder="root" required>
+      </div>
+      <div class="form-group">
+        <label for="ssh_password">Password:</label>
+        <input type="password" id="ssh_password" name="ssh_password" placeholder="myPassword" required>
+      </div>
+      <button type="submit" class="submit-btn">Add Node</button>
+    </form>
+  </div>
 </div>
 </body>
 {% endblock %}
