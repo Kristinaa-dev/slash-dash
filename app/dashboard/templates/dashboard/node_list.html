@@ -90,33 +90,48 @@
         <div class="node-card">
           <div class="node-card-header">
             <div>
-              <span class="status-badge online">online</span>
-              <span class="type-badge control">control</span>
+              <!-- Using Django variables to decide if it's online/offline -->
+              <span 
+                class="status-badge {% if node_data.status == 'online' %}online{% else %}offline{% endif %}">
+                {{ node_data.status }}
+              </span>
+      
+              <!-- Example type badge (control, agent, database...) -->
+              <span class="status-badge {{ node_data.type }}">
+                {{ node_data.type }}
+              </span>
             </div>
             <button class="menu-btn">•••</button>
           </div>
+      
           <div class="node-info">
-            <h3>Control-1</h3>
-            <p>192.168.0.1</p>
-            <p>US East</p>
+            <h3>{{ node_data.hostname }}</h3>
+            <p>{{ node_data.ip_address }}</p>
+            <p>{{ node_data.region }}</p>
           </div>
+      
           <div class="usage-bars">
+            <!-- CPU -->
             <div class="usage-row">
               <span class="usage-label">CPU</span>
               <div class="bar">
-                <span class="fill cpu"></span>
+                <span class="fill cpu" style="width: {{ node_data.cpu_usage }}%;"></span>
               </div>
             </div>
+      
+            <!-- Memory -->
             <div class="usage-row">
               <span class="usage-label">Mem</span>
               <div class="bar">
-                <span class="fill mem"></span>
+                <span class="fill mem" style="width: {{ node_data.mem_usage }}%;"></span>
               </div>
             </div>
+      
+            <!-- Disk -->
             <div class="usage-row">
               <span class="usage-label">Disk</span>
               <div class="bar">
-                <span class="fill disk"></span>
+                <span class="fill disk" style="width: {{ node_data.disk_usage }}%;"></span>
               </div>
             </div>
           </div>
