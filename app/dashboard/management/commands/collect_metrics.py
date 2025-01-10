@@ -27,7 +27,7 @@ class Command(BaseCommand):
             uptime_seconds = int(uptime_seconds)
 
             total_network_io = net_io.bytes_sent + net_io.bytes_recv
-            free_disk_percentage = round((disk_usage_info.free / disk_usage_info.total) * 100, 1)
+            free_disk_percentage = round((disk_usage_info.total / disk_usage_info.used), 1)
 
             TimeSeriesData.objects.bulk_create([
                 TimeSeriesData(metric_type=metrics['cpu_usage'], timestamp=timestamp, value=cpu_usage),
