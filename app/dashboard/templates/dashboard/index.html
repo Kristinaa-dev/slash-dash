@@ -216,8 +216,8 @@
             }
 
             // Update Disk Usage
-            if (data.disk_space_available) {
-              let diskVal = data.disk_space_available.value;
+            if (data.disk_used) {
+              let diskVal = data.disk_used.value;
               let diskUnit = '%';
               document.getElementById('diskValue').textContent = diskVal + diskUnit;
               document.getElementById('diskBar').style.width = diskVal + '%';
