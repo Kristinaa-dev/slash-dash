@@ -574,36 +574,73 @@ from .models import Node
 from .system_data import retrieve_system_data
 
 @login_required  # require login to see this page
+# def node_list(request):
+#     nodes = Node.objects.all()
+#     for node in nodes:
+#         try:
+#             response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
+#             print(response.json())
+            
+            
+#             if response.status_code == 200:
+#                 node.status = "online"
+#                 node.last_check_in = timezone.now()
+#             else:
+#                 node.status = "offline"
+#         except requests.exceptions.RequestException:
+#             node.status = "offline"
+
+#         node.save()
+    
+    
+#     node_data = retrieve_system_data()
+#     context = {
+#         "node_data": node_data,
+#     }
+#     test_ssh_connection('127.0.0.1', 'kys', '1425')
+
+
+#     return render(request, "dashboard/node_list.html", context)
 def node_list(request):
-    """
-    Displays all agent nodes in a simple table.
-    Tries to ping each node at /ping to update online/offline status.
-    """
-    # nodes = Node.objects.all()
+    # Retrieve all nodes from the database
+    nodes = Node.objects.all()
 
-    # for node in nodes:
-    #     try:
-    #         response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
-    #         if response.status_code == 200:
-    #             # If ping returns OK
-    #             node.status = "online"
-    #             node.last_check_in = timezone.now()
-    #         else:
-    #             # If the agent returns another status code
-    #             node.status = "offline"
-    #     except requests.exceptions.RequestException:
-    #         # Could be a timeout or connection error
-    #         node.status = "offline"
+    # Check the status of each node
+    for node in nodes:
+        try:
+            response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
+            if response.status_code == 200:
+                node.status = "online"
+                node.last_check_in = timezone.now()
+            else:
+                node.status = "offline"
+        except requests.exceptions.RequestException:
+            node.status = "offline"
 
-    #     node.save()
-    node_data = retrieve_system_data()
+        node.save()
+
+    # Retrieve the latest metrics for each node
+    node_data = {}
+    for node in nodes:
+        latest_metrics = TimeSeriesData.objects.filter(node=node).order_by('-timestamp')[:5]
+        metrics = {metric.metric_type.name: metric.value for metric in latest_metrics}
+        print(node.status)
+        print(metrics)
+        node_data[node.name] = {
+            "ip_address": node.ip_address,
+            "status": node.status,
+            "node_type": node.node_type,
+            "location": node.location,
+            "last_check_in": node.last_check_in,
+            "metrics": metrics,
+        }
+
     context = {
+        "nodes": nodes,
         "node_data": node_data,
     }
-
-
+    print(context)
     return render(request, "dashboard/node_list.html", context)
-
 
 
 import paramiko
@@ -611,20 +648,35 @@ from django.shortcuts import render, redirect
 from .forms import NodeForm
 from .models import Node
 
+
+def check_status(request):
+    nodes = Node.objects.all()
+    for node in nodes:
+        try:
+            response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
+            if response.status_code == 200:
+                node.status = "online"
+                node.last_check_in = timezone.now()
+            else:
+                node.status = "offline"
+        except requests.exceptions.RequestException:
+            node.status = "offline"
+
+        node.save()
+
+    return redirect("node_list")
+
+
 def add_node(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = NodeForm(request.POST)
         if form.is_valid():
-            node = form.save(commit=False)
-            if test_ssh_connection(node.ip_address, node.ssh_username, node.ssh_password):
-                node.status = 'online'
-            else:
-                node.status = 'offline'
-            node.save()
-            return redirect('dashboard')
+            form.save()
+            return redirect("node_list")
     else:
         form = NodeForm()
-    return render(request, 'dashboard/add_node.html', {'form': form})
+
+    return render(request, "dashboard/add_node.html", {"form": form})
 
 def test_ssh_connection(ip, username, password):
     try:
@@ -632,6 +684,8 @@ def test_ssh_connection(ip, username, password):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ip, username=username, password=password)
         ssh.close()
+        print("Connection successful")
         return True
     except Exception as e:
+        print("KURVA")
         return False
