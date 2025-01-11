@@ -103,6 +103,64 @@
         </div>
       </div>
 
+<!-- Node List -->
+<div class="node-list">
+  {% for node_name, node_data in node_data.items %}
+    <!-- Node Card -->
+    <div class="node-card">
+      <div class="node-card-header">
+        <div>
+          <!-- Status Badge -->
+          <span class="status-badge {% if node_data.status == 'online' %}online{% else %}offline{% endif %}">
+            {{ node_data.status }}
+          </span>
+          <span class="type-badge {{ node_data.node_type|lower|default:'agent' }}"> 
+            {{ node_data.node_type|lower|default:'agent' }} 
+          </span>
+        </div>
+        <button class="menu-btn">•••</button>
+      </div>
+
+      <!-- Node Info -->
+      <div class="node-info">
+        <h3>{{ node_name }}</h3>
+        <p>{{ node_data.ip_address }}</p>
+        <p>{{ node_data.location|default:'Unknown Region' }}</p>
+      </div>
+
+      <!-- Usage Bars -->
+      <div class="usage-bars">
+        <!-- CPU Usage -->
+        <div class="usage-row">
+          <span class="usage-label">CPU</span>
+          <div class="bar">
+            <span class="fill cpu" style="width: {{ node_data.metrics.cpu_usage|default:0 }}%;"></span>
+          </div>
+        </div>
+
+        <!-- Memory Usage -->
+        <div class="usage-row">
+          <span class="usage-label">Mem</span>
+          <div class="bar">
+            <span class="fill mem" style="width: {{ node_data.metrics.memory_usage|default:0 }}%;"></span>
+          </div>
+        </div>
+
+        <!-- Disk Usage -->
+        <div class="usage-row">
+          <span class="usage-label">Disk</span>
+          <div class="bar">
+            <span class="fill disk" style="width: {{ node_data.metrics.disk_used|default:0 }}%;"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+</div>
+{% comment %} 
+
+
       <!-- Node List -->
       <div class="node-list">
         <!-- Example Card 1 -->
@@ -116,9 +174,7 @@
               </span>
       
               <!-- Example type badge (control, agent, database...) -->
-              <span class="status-badge {{ node_data.type }}">
-                {{ node_data.type }}
-              </span>
+              <span class="type-badge database">database</span>
             </div>
             <button class="menu-btn">•••</button>
           </div>
@@ -228,7 +284,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> {% endcomment %}
 
     <!-- Right Column: System Alerts -->
     <div class="system-alerts">
