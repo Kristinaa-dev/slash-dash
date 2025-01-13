@@ -2,7 +2,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.utils import timezone
-from .models import TimeSeriesData, MetricType, LogEntry
+from .models import TimeSeriesData, MetricType, LogEntry, Node
 from collections import defaultdict
 from django.db.models.functions import TruncDate
 from django.db.models import DateField, Max, Min
@@ -106,7 +106,7 @@ def docker_monitor(request):
             })
 
     cache.set('docker_stats', container_data, timeout=30)
-    print(f"Total time: {time.time() - start_time:.2f}s")
+    # print(f"Total time: {time.time() - start_time:.2f}s")
     return render(request, 'dashboard/docker_monitor.html', {'containers': container_data})
 
 # def docker_monitor(request):
@@ -357,7 +357,6 @@ def logs(request):
 
     logs = LogEntry.objects.all()
     
-
     if selected_priority and selected_priority != 'all':
         try:
             priority_value = int(selected_priority)
@@ -569,63 +568,62 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 import requests
-
+import time
 from .models import Node
-from .system_data import retrieve_system_data
+import socket
 
-@login_required  # require login to see this page
-# def node_list(request):
-#     nodes = Node.objects.all()
-#     for node in nodes:
-#         try:
-#             response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
-#             print(response.json())
-            
-            
-#             if response.status_code == 200:
-#                 node.status = "online"
-#                 node.last_check_in = timezone.now()
-#             else:
-#                 node.status = "offline"
-#         except requests.exceptions.RequestException:
-#             node.status = "offline"
-
-#         node.save()
-    
-    
-#     node_data = retrieve_system_data()
-#     context = {
-#         "node_data": node_data,
-#     }
-#     test_ssh_connection('127.0.0.1', 'kys', '1425')
-
-
-#     return render(request, "dashboard/node_list.html", context)
+import psutil
+from datetime import datetime
+from django.utils import timezone
+from django.utils.timesince import timesince
+# import pytz
+@login_required
 def node_list(request):
     # Retrieve all nodes from the database
     nodes = Node.objects.all()
 
-    # Check the status of each node
-    for node in nodes:
-        try:
-            response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
-            if response.status_code == 200:
-                node.status = "online"
-                node.last_check_in = timezone.now()
-            else:
-                node.status = "offline"
-        except requests.exceptions.RequestException:
-            node.status = "offline"
+    # Gather specific data for control node (if desired)
+    online_nodes_count = Node.objects.filter(status='online').count()
+    offline_nodes_count = Node.objects.filter(status='offline').count()
+    hostname = socket.gethostname()
 
-        node.save()
-
-    # Retrieve the latest metrics for each node
+    
+    tz_aware_boot_time = timezone.make_aware(datetime.fromtimestamp(psutil.boot_time()))
+    uptime = timesince(tz_aware_boot_time, timezone.now())
+    
+    control_node = Node.objects.get(name='Control')  # or you can remove this if unused
+    
+    control_node_data = {
+        "hostname": hostname,
+        "ip": control_node.ip_address,
+        "status": control_node.status,
+        "uptime": uptime,
+        "last_check_in": control_node.last_check_in,
+        "online_nodes": online_nodes_count,
+        "offline_nodes": offline_nodes_count,
+        "total_nodes": online_nodes_count + offline_nodes_count,
+    }
+    # Build up your node_data dictionary
     node_data = {}
+
     for node in nodes:
-        latest_metrics = TimeSeriesData.objects.filter(node=node).order_by('-timestamp')[:5]
-        metrics = {metric.metric_type.name: metric.value for metric in latest_metrics}
-        print(node.status)
-        print(metrics)
+        # Example: Force the Control node to always be "online" (if that is your requirement)
+        if node.node_type == 'Control':
+            node.status = 'online'
+            node.last_check_in = timezone.now()
+            node.save()
+
+        # Gather latest metrics if node is online
+        if node.status == 'offline':
+            metrics = {}
+        else:
+            latest_metrics = (
+                TimeSeriesData.objects
+                .filter(node=node)
+                .order_by('-timestamp')[:5]
+            )
+            metrics = {metric.metric_type.name: metric.value for metric in latest_metrics}
+
         node_data[node.name] = {
             "ip_address": node.ip_address,
             "status": node.status,
@@ -635,36 +633,42 @@ def node_list(request):
             "metrics": metrics,
         }
 
+    def sort_key(item):
+        """
+        item is a tuple: (node_name, data_dict)
+        data_dict has keys: "node_type", "status", ...
+        """
+        node_name, data = item
+        # Priority for node_type 'Control' => 0
+        # Priority for status 'online' => 1
+        # Priority for everything else (offline, etc.) => 2
+        if data['node_type'] == 'Control':
+            return 0
+        elif data['status'] == 'online':
+            return 1
+        return 2
+
+    # Sort node_data by our custom key
+    # print(node_data)
+
+    sorted_node_data = sorted(node_data.items(), key=sort_key)
+    # print(sorted_node_data)
+    # Pass sorted data to the template.
+    # Notice now it’s a list of tuples, so adjust your template loop accordingly.
     context = {
-        "nodes": nodes,
-        "node_data": node_data,
+        "nodes": nodes,  # if you still need the raw queryset
+        "node_data": sorted_node_data,
+        "control_node": control_node_data,
     }
-    print(context)
+
     return render(request, "dashboard/node_list.html", context)
+
 
 
 import paramiko
 from django.shortcuts import render, redirect
 from .forms import NodeForm
 from .models import Node
-
-
-def check_status(request):
-    nodes = Node.objects.all()
-    for node in nodes:
-        try:
-            response = requests.get(f"http://{node.ip_address}:5000/ping", timeout=2)
-            if response.status_code == 200:
-                node.status = "online"
-                node.last_check_in = timezone.now()
-            else:
-                node.status = "offline"
-        except requests.exceptions.RequestException:
-            node.status = "offline"
-
-        node.save()
-
-    return redirect("node_list")
 
 
 def add_node(request):
@@ -687,5 +691,22 @@ def test_ssh_connection(ip, username, password):
         print("Connection successful")
         return True
     except Exception as e:
-        print("KURVA")
         return False
+
+def get_node_data(request):
+    nodes = Node.objects.all()
+    node_list_data = []
+    print("Getting node data...")
+    for node in nodes:
+        latest_metrics = TimeSeriesData.objects.filter(node=node).order_by('-timestamp')[:5]
+        metrics = {metric.metric_type.name: metric.value for metric in latest_metrics}
+        node_list_data.append({
+            "name": node.name,
+            "ip_address": node.ip_address,
+            "status": node.status,
+            "node_type": node.node_type,
+            "location": node.location,
+            "last_check_in": str(node.last_check_in),
+            "metrics": metrics,
+        })
+    return JsonResponse(node_list_data, safe=False)
