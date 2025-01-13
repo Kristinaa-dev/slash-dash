@@ -8,7 +8,10 @@ import docker
 @shared_task
 def run_collect_metrics():
     call_command("collect_metrics")
-    call_command("fetch_system_logs")
+    
+@shared_task
+def run_collect_logs():
+    call_command("fetch_system_logs")    
     
 @shared_task
 def update_docker_stats():
@@ -39,3 +42,11 @@ def update_docker_stats():
                 'ports': format_ports(container.attrs['NetworkSettings']['Ports']),
             })
     cache.set('docker_stats', data_list, timeout=30)
+    
+@shared_task
+def collect_node_data():
+    call_command("collect_node_data")
+    
+@shared_task    
+def ping_nodes():
+    call_command("ping_nodes")
