@@ -19,5 +19,7 @@ urlpatterns = [
     
     path("nodes/", views.node_list, name="node_list"),
     path("nodes/add", views.add_node, name="add_node"),
+    
+    path('get_node_data/', views.get_node_data, name='get_node_data'),
 ]
 
