@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}
   Agent Nodes
@@ -36,50 +37,43 @@
       };
     </script>
 
-
+      <div></div>
       <div class="node-cont">
         <!-- Header Section -->
         <div class="card-header">
           <h2>Control Node</h2>
-          <p>Najlepsi node na svete</p>
+          <p>{{ control_node.hostname }}</p>
         </div>
     
         <!-- Status / IP Row -->
         <div class="status-row">
           <p>
-            Status: <span class="status-online">Online</span>
+            Status: <span id="control-node-status"  class="status-online">{{ control_node.status }}</span>
           </p>
-          <p>IP: 192.168.0.1</p>
+          <p>IP: <span id="control-node-ip">{{ control_node.ip }}</span></p>
         </div>
     
         <!-- Info Grid (Uptime, Last ping, Connected nodes, Online nodes) -->
         <div class="info-grid">
           <div class="info-box">
             <div class="label">Uptime</div>
-            <div class="value">5d 12h 30m</div>
+            <div class="value">{{ control_node.uptime }}</div>
           </div>
           <div class="info-box">
             <div class="label">Last ping</div>
-            <div class="value">2 min ago</div>
+            <div class="value">{{ control_node.last_check_in|naturaltime }}</div>
           </div>
           <div class="info-box">
             <div class="label">Connected nodes</div>
-            <div class="value">4</div>
+            <div class="value">{{ control_node.total_nodes }}</div>
           </div>
           <div class="info-box last">
             <div class="label">Online nodes</div>
-            <div class="value">4</div>
+            <div class="value">{{ control_node.online_nodes }}</div>
           </div>
         </div>
       </div>
       
-      {% comment %} <h2 class="sub-title">Agent Nodes</h2> {% endcomment %}
-
-
-
-
-
-
 <div>
 
   <div class="dashboard">
@@ -105,7 +99,7 @@
 
 <!-- Node List -->
 <div class="node-list">
-  {% for node_name, node_data in node_data.items %}
+  {% for node_name, node_data in node_data %}
     <!-- Node Card -->
     <div class="node-card">
       <div class="node-card-header">
@@ -125,7 +119,7 @@
       <div class="node-info">
         <h3>{{ node_name }}</h3>
         <p>{{ node_data.ip_address }}</p>
-        <p>{{ node_data.location|default:'Unknown Region' }}</p>
+        <p>{{ node_data.last_check_in|naturaltime|default:'Never' }}</p>
       </div>
 
       <!-- Usage Bars -->
@@ -158,133 +152,6 @@
   {% endfor %}
 </div>
 </div>
-{% comment %} 
-
-
-      <!-- Node List -->
-      <div class="node-list">
-        <!-- Example Card 1 -->
-        <div class="node-card">
-          <div class="node-card-header">
-            <div>
-              <!-- Using Django variables to decide if it's online/offline -->
-              <span 
-                class="status-badge {% if node_data.status == 'online' %}online{% else %}offline{% endif %}">
-                {{ node_data.status }}
-              </span>
-      
-              <!-- Example type badge (control, agent, database...) -->
-              <span class="type-badge database">database</span>
-            </div>
-            <button class="menu-btn">•••</button>
-          </div>
-      
-          <div class="node-info">
-            <h3>{{ node_data.hostname }}</h3>
-            <p>{{ node_data.ip_address }}</p>
-            <p>{{ node_data.region }}</p>
-          </div>
-      
-          <div class="usage-bars">
-            <!-- CPU -->
-            <div class="usage-row">
-              <span class="usage-label">CPU</span>
-              <div class="bar">
-                <span class="fill cpu" style="width: {{ node_data.cpu_usage }}%;"></span>
-              </div>
-            </div>
-      
-            <!-- Memory -->
-            <div class="usage-row">
-              <span class="usage-label">Mem</span>
-              <div class="bar">
-                <span class="fill mem" style="width: {{ node_data.mem_usage }}%;"></span>
-              </div>
-            </div>
-      
-            <!-- Disk -->
-            <div class="usage-row">
-              <span class="usage-label">Disk</span>
-              <div class="bar">
-                <span class="fill disk" style="width: {{ node_data.disk_usage }}%;"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Example Card 2 -->
-        <div class="node-card">
-          <div class="node-card-header">
-            <div>
-              <span class="status-badge offline">offline</span>
-              <span class="type-badge agent">agent</span>
-            </div>
-            <button class="menu-btn">•••</button>
-          </div>
-          <div class="node-info">
-            <h3>Agent-1</h3>
-            <p>192.168.1.1</p>
-            <p>US East</p>
-          </div>
-          <div class="usage-bars">
-            <div class="usage-row">
-              <span class="usage-label">CPU</span>
-              <div class="bar">
-                <span class="fill cpu" style="width: 30%;"></span>
-              </div>
-            </div>
-            <div class="usage-row">
-              <span class="usage-label">Mem</span>
-              <div class="bar">
-                <span class="fill mem" style="width: 20%;"></span>
-              </div>
-            </div>
-            <div class="usage-row">
-              <span class="usage-label">Disk</span>
-              <div class="bar">
-                <span class="fill disk" style="width: 80%;"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Example Card 3 -->
-        <div class="node-card">
-          <div class="node-card-header">
-            <div>
-              <span class="status-badge online">online</span>
-              <span class="type-badge database">database</span>
-            </div>
-            <button class="menu-btn">•••</button>
-          </div>
-          <div class="node-info">
-            <h3>DB-1</h3>
-            <p>192.168.1.2</p>
-            <p>US West</p>
-          </div>
-          <div class="usage-bars">
-            <div class="usage-row">
-              <span class="usage-label">CPU</span>
-              <div class="bar">
-                <span class="fill cpu" style="width: 45%;"></span>
-              </div>
-            </div>
-            <div class="usage-row">
-              <span class="usage-label">Mem</span>
-              <div class="bar">
-                <span class="fill mem" style="width: 65%;"></span>
-              </div>
-            </div>
-            <div class="usage-row">
-              <span class="usage-label">Disk</span>
-              <div class="bar">
-                <span class="fill disk" style="width: 25%;"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> {% endcomment %}
 
     <!-- Right Column: System Alerts -->
     <div class="system-alerts">
