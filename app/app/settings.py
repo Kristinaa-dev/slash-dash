@@ -42,6 +42,18 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dashboard.tasks.update_docker_stats",
         "schedule": 30.0, 
     },
+    "run-collect-nodes-every-10-seconds": {
+        "task": "dashboard.tasks.collect_node_data",
+        "schedule": 10.0, 
+    },
+    "check-nodes-status-every-8-seconds": {
+        "task": "dashboard.tasks.ping_nodes",
+        "schedule": 8.0,
+    },
+    "run-collect-logs-every-30-seconds": {
+        "task": "dashboard.tasks.run_collect_logs",
+        "schedule": 30.0,
+    }
 }
 
 CELERY_BROKER_URL = "redis://localhost:6379/0"
@@ -58,6 +70,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
