@@ -1,7 +1,7 @@
 :root {
 	--background-dark: #0c0d11;
 	--background-dark-secondary: #15161a;
-	--background-dark-terciary: #1e1f26;
+	--background-dark-terciary: #333;
 	--text-color: #ffffff;
 	--text-color-time: #ffffffda;
 	--text-gray: #888;
@@ -15,6 +15,11 @@
 	--error-color-t: #ef444410;
 	--debug-color: #22C55E;
 	--debug-color-t: #22c55e10;
+	--purple-color: #D870FF;
+	--purple-color-t: #D870FF10;
+	--teal-color: #17A2B8;
+	--teal-color-t: #17a2b810;
+	--badge-text: #ffffffca;
 }
 
 
@@ -133,7 +138,9 @@
 .filters select {
 	background-color: var(--background-dark-secondary);
 	color: #fff;
-	border: 1px solid #333; /* Darker border */
+	border: none;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+	/* Darker border */
 	padding: 6px 10px;
 	border-radius: 4px;
 	cursor: pointer;
@@ -155,7 +162,7 @@
 	padding: 16px;
 	/* width: 25.98rem; */
 	width: calc(100% / 3 - 15px);
-
+	margin-bottom: 24px;
 	/* Set a fixed width or use responsive sizing */
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 	position: relative;
@@ -167,11 +174,11 @@
 .node-card-header {
 	display: flex;
 	justify-content: space-between;
-	margin-bottom: 10px;
+	/* margin-bottom: 10px; */
 }
 
 /* Example status badges */
-.status-badge {
+/* .status-badge {
 	font-size: 0.75rem;
 	padding: 3px 6px;
 	border-radius: 4px;
@@ -182,43 +189,81 @@
 
 .online {
 	background-color: var(--debug-color);
-	/* Green */
 }
 
 .offline {
 	background-color: var(--error-color);
-	/* Red */
-}
+} */
 
-/* Example type badges */
-.type-badge {
+.status-badge {
+	display: inline-block;
 	font-size: 0.75rem;
-	padding: 3px 6px;
+	padding: 4px 10px;
 	border-radius: 4px;
 	text-transform: uppercase;
 	font-weight: bold;
 	margin-right: 8px;
+	color: var(--badge-text);
+	/* New dark background + light text for better readability */
+	background-color: #1E1F24;
+	/* or your dark shade */
+	/* color: #CCCCCC; */
+	/* Subtle border that blends with a dark theme */
+	border: 1px solid #ffffff05;
+	/* A little breathing room on the left for the status "stripe" */
+	padding-left: 8px;
+}
+
+/* ONLINE badge gets a green accent on the left */
+.status-badge.online {
+	border-left: 4px solid var(--debug-color);
+	/* or var(--debug-color) */
+	background-color: var(--debug-color-t);
+}
+
+/* OFFLINE badge gets a red accent on the left */
+.status-badge.offline {
+	border-left: 4px solid var(--error-color);
+	background-color: var(--error-color-t);
+	/* or var(--error-color) */
+}
+
+
+
+
+
+/* Example type badges */
+.type-badge {
+	font-size: 0.75rem;
+	padding: 4px 10px;
+	border-radius: 4px;
+	text-transform: uppercase;
+	font-weight: bold;
+	margin-right: 8px;
+	color: var(--badge-text);
+	border: 1px solid #ffffff05;
 }
 
 .control {
-	background-color: #ab47bc;
-	/* Purple */
+	border-left: 4px solid var(--purple-color);
+	background-color: var(--purple-color-t);
 }
 
 .agent {
-	background-color: var(--info-color);
-	/* Blue */
+	border-left: 4px solid var(--info-color);
+	background-color: var(--info-color-t);
 }
 
 .database {
-	background-color: var(--debug-color);
-	/* Green */
+	border-left: 4px solid var(--teal-color);
+	background-color: var(--teal-color-t);
 }
 
 /* The node name/IP/region info */
 .node-info h3 {
-	font-size: 1.15rem;
-	margin-bottom: 4px;
+	font-size: 1.25rem;
+	margin-bottom: 10px;
+	margin-top: 10px
 }
 
 .node-info p {
@@ -262,21 +307,21 @@
 }
 
 .fill.cpu {
-	background-color: #3f51b5;
+	background-color: #3B82F6;
 	/* Blue-ish */
 	width: 60%;
 	/* Example usage */
 }
 
 .fill.mem {
-	background-color: #00bfa5;
+	background-color: #10B981;
 	/* Teal */
 	width: 40%;
 	/* Example usage */
 }
 
 .fill.disk {
-	background-color: #ff9800;
+	background-color: #F59E0B;
 	/* Orange */
 	width: 75%;
 	/* Example usage */
