@@ -42,7 +42,7 @@ class Command(BaseCommand):
             disk_usage_info = psutil.disk_usage('/')
             uptime_seconds = int(time.time() - psutil.boot_time())
             total_network_io = net_io.bytes_sent + net_io.bytes_recv
-            disk_used = round((disk_usage_info.total / disk_usage_info.used), 1)
+            disk_used = round((disk_usage_info.used / disk_usage_info.total)*100, 1)
 
             # Create TimeSeriesData records associated with the 'Control' node
             TimeSeriesData.objects.bulk_create([

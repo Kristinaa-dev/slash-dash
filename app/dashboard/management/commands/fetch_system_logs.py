@@ -11,8 +11,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Fetch the most recent logs since the last timestamp in the database
         last_log = LogEntry.objects.first()
-        since_time = last_log.timestamp.isoformat() if last_log else '1 hour ago'
-
+        # since_time = last_log.timestamp.isoformat() if last_log else '1 hour ago'
+        since_time = last_log.timestamp.strftime('%Y-%m-%d %H:%M:%S') if last_log else '1 hour ago'
         result = subprocess.run(
             ['journalctl', '--since', since_time, '--no-pager', '--output=json'],
             capture_output=True, text=True
@@ -20,15 +20,14 @@ class Command(BaseCommand):
 
         logs = result.stdout.strip().split('\n')
         new_entries = []
-
         for log_json in logs:
             if not log_json:
                 continue
             log_entry = parse_journalctl_json(log_json)
             if log_entry:
                 new_entries.append(LogEntry(**log_entry))
-
         LogEntry.objects.bulk_create(new_entries)
+        
         self.stdout.write(self.style.SUCCESS('Successfully fetched and stored logs.'))
 
 def parse_journalctl_json(log_json):
