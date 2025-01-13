@@ -1,11 +1,9 @@
 from flask import Flask, jsonify
-# from datetime import datetime
+
 import socket
 import psutil
 import time
 import datetime
-
-
 
 app = Flask(__name__)
 
@@ -42,18 +40,18 @@ def collect_metrics():
 
     # Calculate additional metrics
     total_network_io = net_io.bytes_sent + net_io.bytes_recv
-    disk_used = round((disk_usage_info.free / disk_usage_info.total), 1)
+    disk_used = round((disk_usage_info.used / disk_usage_info.total) * 100, 1)
 
     # Prepare the metrics dictionary
     metrics = {
         'timestamp': timestamp,
         'cpu_usage': cpu_usage,
-        'memory_usage_percent': memory_usage,
+        'memory_usage': memory_usage,
         'network_io': total_network_io,
-        'disk_usage': disk_used,  # WRONG NAME
+        'disk_used': disk_used,  # WRONG NAME
         'server_uptime': uptime_seconds
     }
-
+    # print(metrics)
     # Return the metrics as JSON
     return jsonify(metrics)
 
