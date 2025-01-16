@@ -53,9 +53,14 @@ CELERY_BEAT_SCHEDULE = {
     "run-collect-logs-every-30-seconds": {
         "task": "dashboard.tasks.run_collect_logs",
         "schedule": 30.0,
-    }
+    },
+    "check-alert-rules-every-minute": {
+        "task": "dashboard.tasks.check_alert_rules",
+        "schedule": 10.0,  # every 60 seconds
+    },
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 # SECURITY WARNING: don't run with debug turned on in production!
