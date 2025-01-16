@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.conf import settings
 
 class Node(models.Model):
     NODE_TYPE_CHOICES = [
@@ -25,6 +25,12 @@ class Node(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.ip_address})"
+
+
+
+
+
+
 
 
 class MetricType(models.Model):
@@ -71,4 +77,43 @@ class LogEntry(models.Model):
 
     def __str__(self):
         return f"[{self.timestamp}] {self.service}: {self.message[:50]}"
+class AlertRule(models.Model):
+    COMPARISON_CHOICES = [
+        ('>', 'Greater than'),
+        ('<', 'Less than'),
+        ('>=', 'Greater or equal to'),
+        ('<=', 'Less or equal to'),
+        ('=', 'Equal to'),
+        ('!=', 'Not equal to'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='alert_rules'
+    )
+    node = models.ForeignKey(
+        Node, 
+        on_delete=models.CASCADE,
+        related_name='alert_rules'
+    )
+    metric_type = models.ForeignKey(
+        MetricType,
+        on_delete=models.CASCADE,
+        related_name='alert_rules'
+    )
+    threshold = models.FloatField()
+    comparison_type = models.CharField(
+        max_length=2,
+        choices=COMPARISON_CHOICES,
+        default='>'
+    )
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return (f"AlertRule (User: {self.user.username}, Node: {self.node.name}, "
+                f"Metric: {self.metric_type.name}, Threshold: {self.comparison_type} {self.threshold})")
     

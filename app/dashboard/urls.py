@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import docker_monitor
+from .views import docker_monitor, create_alert_rule
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
@@ -21,5 +21,6 @@ urlpatterns = [
     path("nodes/add", views.add_node, name="add_node"),
     
     path('get_node_data/', views.get_node_data, name='get_node_data'),
+    path('create-alert-rule/', views.create_alert_rule, name='create_alert_rule'),
 ]
 

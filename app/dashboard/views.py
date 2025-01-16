@@ -710,3 +710,29 @@ def get_node_data(request):
             "metrics": metrics,
         })
     return JsonResponse(node_list_data, safe=False)
+
+
+
+# app/views.py
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+from .forms import AlertRuleForm
+
+@login_required
+def create_alert_rule(request):
+    if request.method == 'POST':
+        form = AlertRuleForm(request.POST)
+        if form.is_valid():
+            alert_rule = form.save(commit=False)
+            # Assign the currently logged-in user to the rule
+            alert_rule.user = request.user
+            alert_rule.save()
+            messages.success(request, "Alert rule created successfully!")
+            return redirect('dashboard')  # or wherever you want to redirect
+    else:
+        form = AlertRuleForm()
+
+    return render(request, 'dashboard/create_alert_rule.html', {'form': form})
