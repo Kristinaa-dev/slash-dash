@@ -1,0 +1,26 @@
+<!-- app/templates/create_alert_rule.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Alert Rule</title>
+</head>
+<body>
+    <h1>Create Alert Rule</h1>
+
+    <!-- Display any success messages or errors -->
+    {% if messages %}
+      <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <form method="POST">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <button type="submit">Create</button>
+    </form>
+</body>
+</html>
