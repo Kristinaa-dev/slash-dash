@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}
+  Alerts
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/graphs.css' %}">
+<link rel="stylesheet" href="{% static 'css/nodes.css' %}">
+<link rel="stylesheet" href="{% static 'css/modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/alerts.css' %}">
+
+
+{% comment %} WORK ON THE FUCKING ADD ALERTS SHIT {% endcomment %}
+
+
+
+<script>
+  // JS for opening/closing the "Create Alert" modal
+  function openModal() {
+    document.getElementById("addNodeModal").style.display = "block";
+  }
+  function closeModal() {
+    document.getElementById("addNodeModal").style.display = "none";
+  }
+  window.onclick = function(event) {
+    if (event.target == document.getElementById("addNodeModal")) {
+      closeModal();
+    }
+  };
+</script>
+
+<h2 class="title">/dash/alerts</h2>
+
+<button class="add-node-btn" onclick="openModal()">
+  <span class="icon-plus">+</span>
+  Add Alert
+</button>
+
+<h2 class="header-title">Active alerts</h2>
+
+
+
+<div class="node-cont" style="margin-top: 20px;">
+	<div class="alert-list" style="display: flex; flex-direction: column; gap: 12px;">
+    {% for alert in alerts %}
+	<div class="alert-card">
+        <div class="alert-info">
+          <h3 class="alert-title">{{ alert.metric_label }}</h3>
+          <p class="alert-threshold">Threshold: {{ alert.threshold_str }}</p>
+        </div>
+        <!-- The toggle switch on the right -->
+        <div class="alert-toggle">
+			<label class="switch">
+				<input type="checkbox"
+				{% if alert.is_active %} checked {% endif %}
+				disabled /> 
+				<!-- 
+              'disabled' just for visual in this example. 
+              If you want it truly functional (toggle in real-time),
+              you can remove 'disabled' and add JS or a form submission.
+			  -->
+			  <span class="slider"></span>
+			</label>
+        </div>
+      </div>
+	  {% endfor %}
+	</div>
+</div>
+
+<!-- Modal for creating a new alert -->
+<div id="addNodeModal" class="modal">
+	<div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <h2 class="modal-title">Create Alert Rule</h2>
+    <p class="modal-description">Enter the details for the new alert rule.</p>
+	
+    <form method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        {{ form.node.label_tag }}
+        {{ form.node }}
+      </div>
+      <div class="form-group">
+		  {{ form.metric_type.label_tag }}
+		  {{ form.metric_type }}
+		</div>
+		<div class="form-group">
+			{{ form.comparison_type.label_tag }}
+			{{ form.comparison_type }}
+		</div>
+		<div class="form-group">
+			{{ form.threshold.label_tag }}
+			{{ form.threshold }}
+		</div>
+		<div class="form-group">
+			{{ form.is_active.label_tag }}
+			{{ form.is_active }}
+		</div>
+		<button type="submit" class="submit-btn">Create</button>
+    </form>
+</div>
+</div>
+{% if messages %}
+  <ul>
+	{% for message in messages %}
+	  <li>{{ message }}</li>
+	{% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

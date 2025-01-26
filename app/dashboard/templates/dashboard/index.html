@@ -55,13 +55,11 @@
       </div>
 
       <div>
-          <div class="graph">
-
-            <h2 class="graph-title padded-title">Docker Summary</h2>
-          </div>
+        <div class="graph">
+          <h2 class="graph-title padded-title">Logs collected</h2>
+          <canvas id="priorityChart" width="400" height="200"></canvas>
+        </div>
       </div>
-
-
     </div>
 
     <!-- Medium data display -->
@@ -71,7 +69,7 @@
         <ul class="list">
           {% for vm in vms %}
             <li class="item">
-              <div class="vm-name">{{ vm.name }}</div>
+              <div class="service-name">{{ vm.name }}</div>
               <div class="status info-button {{ vm.status|lower }} ">{{ vm.status|capfirst }}</div>
             </li>
           {% endfor %}
@@ -93,20 +91,96 @@
           <li class="item">
             <span class="service-name">PostgreSQL</span>
             <span class="service-status info-button {{ services.postgres|lower }}">{{ services.postgres }}</span>
-
-
           </li>
         </ul>
       </div>
-
       <div class="status-card">
-        <h2 class="graph-title">Alerts</h2>
-
+        {% comment %} <h2 class="graph-title">Alerts</h2> {% endcomment %}
+        {% comment %} <ul class="list">
+          {% for alert in alerts %}
+            <li class="item">
+              <div class="service-name">{{ alert.node__name }}</div>
+              <div class="alert-status">Alerts set: {{ alert.alert_count }}</div>
+            </li>
+          {% endfor %}
+        </ul> {% endcomment %}
+          {% comment %} <div class="node-alerts"> {% endcomment %}
+          <h2 class="graph-title">Node Alerts</h2>
+          {% comment %} </div> {% endcomment %}
+        
+          <div class="node-alerts-grid">
+            {% for alert in alerts %}
+              <div class="node-alert">
+                <div class="node-alert-name">{{ alert.node__name }}</div>
+                <div class="node-alert-count">{{ alert.alert_count }}</div>
+              </div>
+            {% endfor %}
+          </div>
       </div>
     </div>
 
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var priority_labels = {{ priority_labels|safe }};  // e.g. ["Debug", "Info", "Notice", ...]
+        var priority_data = {{ priority_data|safe }};      // e.g. [10, 25, 3, 7, ...]
+
+        // Set up the Chart.js bar chart
+        var ctx2 = document.getElementById('priorityChart').getContext('2d');
+        var priorityChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: priority_labels,
+                datasets: [{
+                    label: 'Log Entries by Priority',
+                    data: priority_data,
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  y: {
+                    beginAtZero: true,              
+                    title: {
+                      display: false,
+                      text: 'Percentage (%)',
+                      color: '#cccccc'
+                    },
+                    grid: {
+                      color: '#ffffff1f'
+                    },
+                    ticks: {
+                      color: '#cccccc'
+                    }
+                  },
+                  x: {
+                    title: {
+                      display: false,
+                      text: 'Time',
+                      color: '#cccccc'
+                    },
+                    grid: {
+                      color: '#ffffff1f'
+                    },
+                    ticks: {
+                      color: '#cccccc',
+                      maxTicksLimit: 15
+                    }
+                  }
+                },
+                plugins: {
+                  legend: {
+                    labels: {
+                      color: '#cccccc'
+                    }
+                  }
+                }
+              }
+        });
+    </script>
     <script>
       // Initialize the chart with data from context
       const initialData = {{ data|safe }};
