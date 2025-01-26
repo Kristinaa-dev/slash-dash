@@ -9,8 +9,8 @@ class TerminalConsumer(AsyncWebsocketConsumer):
         self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.ssh_client.connect(
             hostname="127.0.0.1",
-            username="kali",
-            password="kali",
+            username="kristina",
+            password="1425  ",
         )
         self.channel = self.ssh_client.invoke_shell()
         asyncio.create_task(self.receive_from_server())
