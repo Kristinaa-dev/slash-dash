@@ -75,60 +75,60 @@ def compare(value, threshold, operator):
         return value != threshold
 
 
-@shared_task
-def check_alert_rules():
-    """
-    Periodic Celery task that:
-    1. Iterates over active AlertRules
-    2. Fetches the latest metric value for that node & metric
-    3. Compares the value against the threshold
-    4. If threshold is crossed:
-       - Send email to user
-       - Create a LogEntry with the alert info
-    """
-    now = timezone.now()
-    active_rules = AlertRule.objects.filter(is_active=True).select_related('node', 'metric_type', 'user')
+# @shared_task
+# def check_alert_rules():
+#     """
+#     Periodic Celery task that:
+#     1. Iterates over active AlertRules
+#     2. Fetches the latest metric value for that node & metric
+#     3. Compares the value against the threshold
+#     4. If threshold is crossed:
+#        - Send email to user
+#        - Create a LogEntry with the alert info
+#     """
+#     now = timezone.now()
+#     active_rules = AlertRule.objects.filter(is_active=True).select_related('node', 'metric_type', 'user')
 
-    for rule in active_rules:
-        # Get the latest TimeSeriesData entry for this node & metric
-        latest_data = (TimeSeriesData.objects
-                       .filter(node=rule.node, metric_type=rule.metric_type)
-                       .order_by('-timestamp')
-                       .first())
+#     for rule in active_rules:
+#         # Get the latest TimeSeriesData entry for this node & metric
+#         latest_data = (TimeSeriesData.objects
+#                        .filter(node=rule.node, metric_type=rule.metric_type)
+#                        .order_by('-timestamp')
+#                        .first())
 
-        if not latest_data:
-            # No data for this metric yet; skip
-            continue
+#         if not latest_data:
+#             # No data for this metric yet; skip
+#             continue
 
-        # Compare the latest metric value with the threshold
-        if compare(latest_data.value, rule.threshold, rule.comparison_type):
-            # Threshold is violated, create a log entry and send an email
+#         # Compare the latest metric value with the threshold
+#         if compare(latest_data.value, rule.threshold, rule.comparison_type):
+#             # Threshold is violated, create a log entry and send an email
 
-            log_msg = (f"Threshold exceeded for metric '{rule.metric_type.name}' "
-                       f"on node '{rule.node.name}'. Value={latest_data.value} "
-                       f"Threshold={rule.comparison_type} {rule.threshold}")
+#             log_msg = (f"Threshold exceeded for metric '{rule.metric_type.name}' "
+#                        f"on node '{rule.node.name}'. Value={latest_data.value} "
+#                        f"Threshold={rule.comparison_type} {rule.threshold}")
 
-            # 1. Log the event
-            LogEntry.objects.create(
-                timestamp=now,
-                hostname=rule.node.name,
-                service="AlertService",
-                priority=4,  # Warning or 3 for Error, etc.
-                message=log_msg,
-            )
+#             # 1. Log the event
+#             LogEntry.objects.create(
+#                 timestamp=now,
+#                 hostname=rule.node.name,
+#                 service="AlertService",
+#                 priority=4,  # Warning or 3 for Error, etc.
+#                 message=log_msg,
+#             )
 
-            # 2. Send an email notification
-            subject = f"Alert: {rule.metric_type.name} threshold exceeded on {rule.node.name}"
-            email_body = (
-                f"Dear {rule.user.username},\n\n"
-                f"{log_msg}\n\n"
-                "Best regards,\nYour Monitoring System"
-            )
+#             # 2. Send an email notification
+#             subject = f"Alert: {rule.metric_type.name} threshold exceeded on {rule.node.name}"
+#             email_body = (
+#                 f"Dear {rule.user.username},\n\n"
+#                 f"{log_msg}\n\n"
+#                 "Best regards,\nYour Monitoring System"
+#             )
 
-            send_mail(
-                subject,
-                email_body,
-                settings.DEFAULT_FROM_EMAIL,  # or some other from address
-                [rule.user.email],
-                fail_silently=False
-            )
+#             send_mail(
+#                 subject,
+#                 email_body,
+#                 settings.DEFAULT_FROM_EMAIL,  # or some other from address
+#                 [rule.user.email],
+#                 fail_silently=False
+#             )

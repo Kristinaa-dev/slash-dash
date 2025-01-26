@@ -21,6 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
 import time
 import concurrent.futures
+from .models import AlertRule
 
 
 def is_admin(user):
@@ -372,7 +373,7 @@ def logs(request):
         except ValueError:
             pass  
         
-    if search_term != None:
+    if search_term != None and search_term != "None":
         logs = logs.filter(
             models.Q(message__icontains=search_term) |
             models.Q(service__icontains=search_term)
@@ -465,28 +466,35 @@ def check_service_status(service_name):
 
 
 
+def alerts_number():
+    alerts_count = (
+        AlertRule.objects
+        .filter(is_active=True)
+        .values('node__name')
+        .annotate(alert_count=Count('id'))
+        .order_by('-alert_count')[:3]
+    )
+    return alerts_count
+    
+
 
 @login_required
-def dashboard(request):
+def dashboard(request): 
     end_time = timezone.now()
     start_time = end_time - timezone.timedelta(minutes=15)
-
-    # Fetch metrics data
+    # Fetch metrics data 
     metrics = MetricType.objects.filter(name__in=['cpu_usage', 'memory_usage'])
-
     data = {}
     for metric in metrics:
         data_points = TimeSeriesData.objects.filter(
             metric_type=metric,
             timestamp__range=(start_time, end_time)
         ).order_by('timestamp')[:15]
-
         data[metric.name] = {
             'timestamps': [dp.timestamp.strftime("%H:%M") for dp in data_points],
             'values': [dp.value for dp in data_points],
             'unit': metric.unit,
         }
-
     # Fetch KVM VM status
     vm_data = []
     try:
@@ -504,10 +512,28 @@ def dashboard(request):
     except Exception as e:
         vm_data = [{'name': 'Error', 'status': str(e)}]
 
+    priority_counts = (
+        LogEntry.objects
+        .values('priority')
+        .annotate(count=Count('id'))
+    )
+    
+    # 2. Create a map for all possible priorities (based on your PRIORITY_CHOICES) with a default count of 0
+    priority_map = {level: 0 for (level, label) in LogEntry.PRIORITY_CHOICES}
+    for item in priority_counts:
+        priority_map[item['priority']] = item['count']
+    
+    # 3. Prepare the data for Chart.js
+    #    We'll keep the order of the priority choices as defined in your model
+    priorities = [label for (level, label) in LogEntry.PRIORITY_CHOICES]
+    counts = [priority_map[level] for (level, label) in LogEntry.PRIORITY_CHOICES]
+
     # Check NGINX and Apache status
     nginx_status = check_service_status('nginx')
     apache_status = check_service_status('apache2')  # Use 'httpd' for Red Hat-based distros
     postgres_status = check_service_status('postgresql')
+    alerts = alerts_number()[:3]
+    print(alerts)
     context = {
         'data': data,
         'vms': vm_data,
@@ -515,7 +541,11 @@ def dashboard(request):
             'nginx': nginx_status,
             'apache': apache_status,
             'postgres': postgres_status,
-        }
+        },
+        'alerts': alerts,
+        'priority_labels': priorities,
+        'priority_data': counts,
+
     }
     return render(request, 'dashboard/index.html', context)
 
@@ -711,28 +741,119 @@ def get_node_data(request):
         })
     return JsonResponse(node_list_data, safe=False)
 
-
-
-# app/views.py
-
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
 from .forms import AlertRuleForm
+from .models import AlertRule
 
 @login_required
-def create_alert_rule(request):
+def alert_list(request):
+    """Display a list of alerts and handle creating a new alert rule."""
+    alerts = AlertRule.objects.all()  # Fetch existing alerts
+
+    if request.method == 'POST':
+        # If form is submitted, process it
+        form = AlertRuleForm(request.POST)
+        if form.is_valid():
+            alert_rule = form.save(commit=False)
+            alert_rule.user = request.user  # assign current user if needed
+            alert_rule.save()
+            messages.success(request, "Alert rule created successfully!")
+            # Redirect back to the same view so it doesn't re-submit on refresh
+            return redirect('alert_list') 
+    else:
+        # If GET request, show an empty form
+        form = AlertRuleForm()
+
+    # Return the same template for both GET and POST
+    return render(request, 'dashboard/alert_list.html', {
+        'alerts': alerts,
+        'form': form,
+    })
+
+
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .forms import AlertRuleForm
+from .models import AlertRule
+
+@login_required
+def alert_list(request):
+    """
+    Single view that shows all alerts and 
+    handles creation of new ones (if needed).
+    """
+    # Fetch all alerts
+    alerts_queryset = AlertRule.objects.all()
+
+    # Define how we map metric_type to a user-friendly label
+    METRIC_LABELS = {
+        'CPU Usage': 'cpu_usage',
+        'Memory Usage': 'memory_usage',
+        'Disk Used': 'disk_used',
+    }
+
+    # Build a list of alerts with nice display
+    alerts = []
+    for alert in alerts_queryset:
+        # Use get_display if metric_type is a ChoiceField, or manually map
+        metric_name = METRIC_LABELS.get(alert.metric_type.name, alert.metric_type.name)
+        threshold_str = f"{alert.threshold}%"  # e.g. "90%"
+        
+        alerts.append({
+            'id': alert.id,
+            'metric_label': metric_name, 
+            'threshold_str': threshold_str,
+            'is_active': alert.is_active,
+        })
+
+    # Handle form submission for creating a new alert rule
     if request.method == 'POST':
         form = AlertRuleForm(request.POST)
         if form.is_valid():
             alert_rule = form.save(commit=False)
-            # Assign the currently logged-in user to the rule
-            alert_rule.user = request.user
+            alert_rule.user = request.user  # if needed
             alert_rule.save()
             messages.success(request, "Alert rule created successfully!")
-            return redirect('dashboard')  # or wherever you want to redirect
+            return redirect('alert_list')  # reload this view
     else:
         form = AlertRuleForm()
 
-    return render(request, 'dashboard/create_alert_rule.html', {'form': form})
+    return render(request, 'dashboard/alert_list.html', {
+        'form': form,
+        'alerts': alerts,  # This is now the human-friendly list
+    })
+
+
+from django.shortcuts import render
+from django.db.models import Count
+from .models import LogEntry
+
+def log_priority_chart():
+    # 1. Aggregate counts of LogEntry by priority
+    priority_counts = (
+        LogEntry.objects
+        .values('priority')
+        .annotate(count=Count('id'))
+    )
+    
+    # 2. Create a map for all possible priorities (based on your PRIORITY_CHOICES) with a default count of 0
+    priority_map = {level: 0 for (level, label) in LogEntry.PRIORITY_CHOICES}
+    for item in priority_counts:
+        priority_map[item['priority']] = item['count']
+    
+    # 3. Prepare the data for Chart.js
+    #    We'll keep the order of the priority choices as defined in your model
+    labels = [label for (level, label) in LogEntry.PRIORITY_CHOICES]
+    data = [priority_map[level] for (level, label) in LogEntry.PRIORITY_CHOICES]
+    
+    # 4. Pass the labels and data to the template
+    context = {
+        'labels2': labels,  # e.g. ["Debug", "Info", "Notice", "Warning", ...]
+        'data': data,      # e.g. [10, 25, 3, 7, ...]
+    }
+    
+    return context
