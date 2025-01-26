@@ -170,31 +170,11 @@
 
 
 
-/* Top row in the card: Node name, status, type label, etc. */
 .node-card-header {
 	display: flex;
 	justify-content: space-between;
 	/* margin-bottom: 10px; */
 }
-
-/* Example status badges */
-/* .status-badge {
-	font-size: 0.75rem;
-	padding: 3px 6px;
-	border-radius: 4px;
-	text-transform: uppercase;
-	font-weight: bold;
-	margin-right: 8px;
-}
-
-.online {
-	background-color: var(--debug-color);
-}
-
-.offline {
-	background-color: var(--error-color);
-} */
-
 .status-badge {
 	display: inline-block;
 	font-size: 0.75rem;
@@ -204,35 +184,23 @@
 	font-weight: bold;
 	margin-right: 8px;
 	color: var(--badge-text);
-	/* New dark background + light text for better readability */
 	background-color: #1E1F24;
-	/* or your dark shade */
-	/* color: #CCCCCC; */
-	/* Subtle border that blends with a dark theme */
 	border: 1px solid #ffffff05;
-	/* A little breathing room on the left for the status "stripe" */
 	padding-left: 8px;
 }
 
-/* ONLINE badge gets a green accent on the left */
 .status-badge.online {
 	border-left: 4px solid var(--debug-color);
 	/* or var(--debug-color) */
 	background-color: var(--debug-color-t);
 }
 
-/* OFFLINE badge gets a red accent on the left */
 .status-badge.offline {
 	border-left: 4px solid var(--error-color);
 	background-color: var(--error-color-t);
 	/* or var(--error-color) */
 }
 
-
-
-
-
-/* Example type badges */
 .type-badge {
 	font-size: 0.75rem;
 	padding: 4px 10px;

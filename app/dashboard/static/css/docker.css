@@ -1,5 +1,4 @@
 :root {
-    /* Background */
     --background-dark: #0c0d11;
     --background-dark-secondary: #15161a;
     --background-light-grey: #ffffff25;
@@ -22,31 +21,28 @@
     padding: 0;
 }
 
-/* Table Styling */
 table {
     width: 100%;
     border-collapse: collapse;
-    border: 1px solid var(--background-light-grey); /* Light grey outer border */
+    border: 1px solid var(--background-light-grey);
 }
 
 th, td {
-    padding: 10px 15px; /* Add some padding for spacing */
+    padding: 10px 15px;
 }
 th {
     padding: 24px;
 }
-/* Table Header Styling */
 th {
     background-color: var(--background-dark-secondary);
-    color: #ffffffc7; /* Lighter bold text */
-    text-align: left; /* Align text to the left for headers */
+    color: #ffffffc7;
+    text-align: left;
     font-weight: bold;
-    border-bottom: 2px solid var(--background-dark-secondary); /* Divider only below header */
+    border-bottom: 2px solid var(--background-dark-secondary);
 }
 
-/* Table Row Styling */
 tr {
-    border-bottom: 1px solid var(--background-light-grey); /* Border only between rows */
+    border-bottom: 1px solid var(--background-light-grey); 
 }
 
 tr:last-child {
@@ -69,18 +65,16 @@ td {
 .text-right {
     text-align: right; /* Align content to the right */
 }
-
+                    
 .text-center {
-    text-align: center; /* Center align content */
+    text-align: center;
 }
 
-/* Dropdown container */
 .dropdown {
     position: relative;
     display: inline-block;
 }
 
-/* Dropdown menu hidden by default */
 .dropdown-menu {
     display: none;
     position: absolute;
@@ -92,7 +86,6 @@ td {
     min-width: 120px;
 }
 
-/* Dropdown menu buttons */
 .dropdown-menu button {
     background: none;
     border: none;
@@ -103,18 +96,15 @@ td {
     font-size: 1rem;
 }
 
-/* Dropdown menu buttons hover */
 .dropdown-menu button:hover {
     background-color: var(--background-dark);
     color: var(--middle);
 }
 
-/* Show dropdown menu when active */
 .dropdown.active .dropdown-menu {
     display: block;
 }
 
-/* Dropdown toggle button (three vertical dots) */
 .dropdown-toggle {
     background: none;
     border: none;
@@ -129,11 +119,8 @@ td {
     padding: 0;
 }
 
-/* Status Styling */
 .status .info-button {
     font-weight: bold;
-    border-radius: 25px;
-    color: white;
     display: inline-block;
     text-align: center;
     padding: 5px 10px;
@@ -141,22 +128,6 @@ td {
     min-width: 80px;
 }
 
-/* Status Colors */
-.status .info-button.running {
-    background-color: var(--positive);
-}
-
-.status .info-button.stopped {
-    background-color: var(--negative);
-}
-
-.status .info-button.paused {
-    background-color: var(--alert-color);
-}
-
-.status .info-button.unknown {
-    background-color: var(--negative);
-}
 .cont-name{
     font-weight: bold;
 }
