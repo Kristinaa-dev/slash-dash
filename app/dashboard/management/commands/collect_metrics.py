@@ -9,6 +9,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Retrieve or create metric types
+        
         metrics = {
             'cpu_usage': MetricType.objects.get_or_create(name='cpu_usage', defaults={'unit': '%'})[0],
             'memory_usage': MetricType.objects.get_or_create(name='memory_usage', defaults={'unit': '%'})[0],
@@ -21,12 +22,12 @@ class Command(BaseCommand):
         node, created = Node.objects.get_or_create(
             name='Control',
             defaults={
-                 'ip_address': '127.0.0.1',
-                 'node_type': 'Control',
-                 'location': 'Europe',        # Adjust as needed
-                 'ssh_username': 'root',      # Set a default username
-                 'ssh_password': 'password',  # Set a default password
-                 'status': 'online',
+                'ip_address': '127.0.0.1',
+                'node_type': 'Control',
+                'location': 'Europe',        # Adjust as needed
+                'ssh_username': 'root',      # Set a default username
+                'ssh_password': 'password',  # Set a default password
+                'status': 'online',
             }
         )
         if created:
@@ -37,22 +38,47 @@ class Command(BaseCommand):
 
             # Collect metrics using psutil
             cpu_usage = psutil.cpu_percent(interval=1)
-            memory_usage = psutil.virtual_memory().percent
+            memory_info = psutil.virtual_memory()
+            memory_usage = memory_info.percent
             net_io = psutil.net_io_counters()
             disk_usage_info = psutil.disk_usage('/')
             uptime_seconds = int(time.time() - psutil.boot_time())
             total_network_io = net_io.bytes_sent + net_io.bytes_recv
-            disk_used = round((disk_usage_info.used / disk_usage_info.total)*100, 1)
+            disk_used = round((disk_usage_info.used / disk_usage_info.total) * 100, 1)
 
-            # Create TimeSeriesData records associated with the 'Control' node
-            TimeSeriesData.objects.bulk_create([
-                TimeSeriesData(node=node, metric_type=metrics['cpu_usage'], timestamp=timestamp, value=cpu_usage),
-                TimeSeriesData(node=node, metric_type=metrics['memory_usage'], timestamp=timestamp, value=memory_usage),
-                TimeSeriesData(node=node, metric_type=metrics['network_io'], timestamp=timestamp, value=total_network_io),
-                TimeSeriesData(node=node, metric_type=metrics['disk_used'], timestamp=timestamp, value=disk_used),
-                TimeSeriesData(node=node, metric_type=metrics['server_uptime'], timestamp=timestamp, value=uptime_seconds),
-            ])
+            # Create TimeSeriesData records individually to trigger the post_save signal
+            TimeSeriesData.objects.create(
+                node=node,
+                metric_type=metrics['cpu_usage'],
+                timestamp=timestamp,
+                value=cpu_usage
+            )
+            TimeSeriesData.objects.create(
+                node=node,
+                metric_type=metrics['memory_usage'],
+                timestamp=timestamp,
+                value=memory_usage
+            )
+            TimeSeriesData.objects.create(
+                node=node,
+                metric_type=metrics['network_io'],
+                timestamp=timestamp,
+                value=total_network_io
+            )
+            TimeSeriesData.objects.create(
+                node=node,
+                metric_type=metrics['disk_used'],
+                timestamp=timestamp,
+                value=disk_used
+            )
+            TimeSeriesData.objects.create(
+                node=node,
+                metric_type=metrics['server_uptime'],
+                timestamp=timestamp,
+                value=uptime_seconds
+            )
 
             self.stdout.write(f"Metrics collected at {timestamp} for node: {node.name}")
+
         except KeyboardInterrupt:
             self.stdout.write("Data collection stopped.")
