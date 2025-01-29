@@ -23,9 +23,16 @@ urlpatterns = [
     path('get_node_data/', views.get_node_data, name='get_node_data'),
     
     # path('create-alert-rule/', views.create_alert_rule, name='create_alert_rule'),
-    path('alerts/', views.alert_list, name='alert_list'),
+    path('alerts_list/', views.alert_list, name='alert_list'),
+    # path('alerts/', views.combined_alert_view, name='combined-alerts'),
+    path('alerts/', views.combined_alert_view, name='combined_alert_view'),
     # path('alerts/ add', 
-    
+    path('alerts/<int:alert_id>/toggle/', views.toggle_alert_active, name='toggle_alert_active'),
+    path('alerts/<int:alert_id>/edit/', views.edit_alert, name='edit_alert'),
     path('log_priority_chart/', views.log_priority_chart, name='log_priority_chart'),
+    # path('alerts/graph/', views.alert_dashboard, name='alert-dashboard'),
+    # ... any other routes
 ]
+
+
 
