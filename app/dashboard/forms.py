@@ -11,4 +11,7 @@ from .models import AlertRule
 class AlertRuleForm(forms.ModelForm):
     class Meta:
         model = AlertRule
-        fields = ['node', 'metric_type', 'comparison_type', 'threshold', 'is_active']
+        fields = [
+            'node', 'metric_type', 'comparison_type', 
+            'threshold', 'severity', 'cooldown_minutes', 'is_active'
+        ]
