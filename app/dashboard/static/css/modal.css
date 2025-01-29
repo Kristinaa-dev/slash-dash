@@ -17,7 +17,6 @@
 	--debug-color-t: #22c55e10;
 }
 
-/* Floating add node button */
 .add-node-btn {
 	background-color: var(--info-color);
 	font-weight: bold;
@@ -116,20 +115,28 @@
 
 /* Submit button inside the form */
 .submit-btn {
-	background-color: var(--info-color);
-	color: #fff;
-	border: none;
+	background-color: #181d27;
+	/* background-color: var(--info-color-t); */
+	border: 2px solid var(--info-color);
+	color: var(--info-color);
+	/* border: none; */
 	border-radius: 4px;
 	padding: 10px 20px;
 	font-size: 14px;
 	cursor: pointer;
+	font-weight: bold;
+	right: 40px;
+	z-index: 9999;
+	bottom: 20px;
 }
-
+.submit-btn-pos {
+	position: absolute;
+	/* display: block; */
+}
 .submit-btn:hover {
 	background-color: #0056b3; /* or a darker shade of var(--info-color) */
 }
 
-/* (Optional) Better spacing for form labels if you prefer side-by-side layout: */
 .form-group {
   display: flex;
   align-items: center;
@@ -144,3 +151,7 @@
   width: 68%;
 }
 
+.header-title{
+	/* margin: 30px 0px; */
+	margin-left: 20px;
+}

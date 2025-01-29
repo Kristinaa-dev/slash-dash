@@ -165,3 +165,10 @@ body {
 .message{
     color: var(--text-color)
 }
+.filter-btn{
+    padding: 6px 16px;
+    /* background-color: var(--button-bg); */
+    /* color: var(--text-color); */
+    font-weight: bold;
+    cursor: pointer;
+}

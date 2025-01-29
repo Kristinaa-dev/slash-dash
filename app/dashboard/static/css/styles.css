@@ -30,10 +30,6 @@
     --badge-text: #ffffffca;
 }
 
-
-
-
-
 * {
     box-sizing: border-box;
     margin: 0px;
@@ -61,9 +57,6 @@ body {
 .main-content {
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
-    /* justify-content: center; */
-    /* padding: 10px; */
     width: 100%;
     margin: 20px;
 }
@@ -105,7 +98,6 @@ body {
 .status-badge.offline {
     border-left: 4px solid var(--error-color);
     background-color: var(--error-color-t);
-    /* or var(--error-color) */
 }
 
 .info-button {
@@ -126,12 +118,9 @@ body {
 }
 
 .service-name {
-    /* font-weight:600; */
     font-size: 1.1rem;
 }
 
-
-/* Status Colors */
 .info-button.running {
     border-left: 4px solid var(--debug-color);
     background-color: var(--debug-color-t);
@@ -166,7 +155,6 @@ body {
 
 .node-alerts-container {
     background-color: #1e293b;
-    /* Dark background similar to your screenshot */
     color: #ffffff;
     padding: 20px;
     border-radius: 8px;
@@ -193,9 +181,8 @@ body {
     padding: 10px 20px;
 }
 
-/* Each node card */
 .node-alert {
-    background-color: #334155;
+    background-color: #282b30;
     padding: 16px;
     border-radius: 8px;
 }

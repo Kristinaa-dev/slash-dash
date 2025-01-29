@@ -4,115 +4,37 @@
     --sidebar-width: 60px;
     --sidebar-expanded-width: 200px;
     --transition-speed: 0.3s;
+    --highlight-blue: #3B82F6;
+
+
 }
 
 .container {
     display: flex;
 }
 
-ul {
-    padding: 0;
-    margin: 0;
-    flex-grow: 1;
-}
-li {
-    list-style: none;
-}
-a {
-    text-decoration: none;
-    color: white;
-    display: flex;
-    align-items: center;
-    padding: 10px;
-}
-
-#sidebar {
-    width: var(--sidebar-width);
+.side-panel {
     background-color: var(--background-dark-secondary);
-    transition: width var(--transition-speed) ease, padding var(--transition-speed) ease;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     height: 100vh;
-}
-
-#sidebar.expanded {
-    width: var(--sidebar-expanded-width);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding-left: 10px;
-    padding-right: 10px;
     transition: width var(--transition-speed) ease, padding var(--transition-speed) ease;
 }
 
-#sidebar.expanded a {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    margin-bottom: 6px;
-    border-radius: 4px;
+/* Collapsed state */
+.side-panel.collapsed {
+    width: var(--sidebar-width);
 }
 
-#sidebar.expanded a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-#sidebar.expanded a .icon {
-    width: 30px;
-    margin-right: 10px;
-    text-align: center;
-}
-
-#sidebar.expanded a .text {
-    flex: 1;
-    font-size: 1em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-#sidebar.expanded a {
-    justify-content: flex-start;
+/* Expanded state */
+.side-panel.expanded {
+    width: var(--sidebar-expanded-width);
     padding-left: 10px;
-    display: flex;
-    align-items: center;
+    padding-right: 10px;
 }
 
-#sidebar.expanded a .icon {
-    width: 30px; /* fixed width for icons */
-    text-align: center;
-}
-
-#sidebar.expanded a .text {
-    margin-left: 10px; /* extra padding for text */
-    flex: 1;          /* lets text line up uniformly */
-}
-
-#sidebar .icon {
-    font-size: 1.5em;
-}
-
-#sidebar.expanded .icon {
-    margin-right: 20px;
-}
-
-#sidebar .text {
-    display: none;
-}
-
-#sidebar.expanded .text {
-    display: inline;
-}
-
-.side-panel.collapsed .text {
-    display: none;
-}
-
-.side-panel.expanded .text {
-    display: inline;
-}
-
+/* Toggle button */
 .toggle-btn {
     cursor: pointer;
     padding: 10px;
@@ -122,15 +44,92 @@ a {
     margin-top: 5px;
 }
 
-#sidebar.collapsed a {
-    justify-content: center;
+/* Sidebar menu items */
+.side-panel ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
 }
 
-#sidebar.collapsed .icon {
-    margin-right: 0;
+.side-panel ul li {
+    margin-bottom: 6px;
 }
 
+/* Sidebar links */
+.side-panel ul li a {
+    text-decoration: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    justify-content: center; /* center icons/text when collapsed */
+    padding: 10px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.side-panel ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.side-panel ul li.active > a {
+    border-left: 4px solid var(--highlight-blue);
+    background-color: #3b82f610; 
+    padding-left: 6px; /* offset for border */
+    color: #fff;
+}
+.side-panel ul li.active > a .icon {
+    color: #6fbafc;
+    /* color: var(--highlight-blue); */
+}
+
+/* Icon spacing */
+.icon {
+    font-size: 1.5em;
+    width: 30px;
+    text-align: center;
+    margin-right: 0; /* no extra space by default (collapsed) */
+}
+
+/* When expanded, shift icons + text */
+.side-panel.expanded ul li a {
+    justify-content: flex-start; 
+}
+.side-panel.expanded ul li a .icon {
+    margin-right: 10px;
+}
+
+/* Hide text when collapsed */
+.text {
+    display: none;
+}
+/* Show text when expanded */
+.side-panel.expanded .text {
+    display: inline;
+    white-space: nowrap;
+}
+
+/* Logout button at bottom */
 .logout {
-    margin-top: auto;
+    margin-top: auto; /* pushes it to the bottom */
     margin-bottom: 0.7em;
 }
+.logout a {
+    /* Match the style of other links */
+    text-decoration: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    justify-content: center; /* center when collapsed */
+    padding: 10px;
+    transition: background-color 0.2s ease-in-out;
+}
+.side-panel.expanded .logout a {
+    justify-content: flex-start; /* align text+icon if expanded */
+}
+.logout a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* main-content stays same as before or your own style... */
