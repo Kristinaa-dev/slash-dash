@@ -60,8 +60,6 @@ client = docker.from_env()
 
 # Docker monitor view
 
-
-
 from django.core.cache import cache
 import concurrent.futures
 import time
@@ -71,7 +69,6 @@ def docker_monitor(request):
     if container_data:
         return render(request, 'dashboard/docker_monitor.html', {'containers': container_data})
 
-    start_time = time.time()
     containers = client.containers.list(all=True)
     container_data = []
 
@@ -99,6 +96,7 @@ def docker_monitor(request):
                 'id': c.short_id,
                 'name': c.name,
                 'image': c.image.tags[0] if c.image.tags else "Unknown",
+                
                 'ports': format_ports(c.attrs['NetworkSettings'].get('Ports', {})),
                 'cpu_usage': 'N/A',
                 'memory_usage': 'N/A',
@@ -110,53 +108,6 @@ def docker_monitor(request):
     # print(f"Total time: {time.time() - start_time:.2f}s")
     return render(request, 'dashboard/docker_monitor.html', {'containers': container_data})
 
-# def docker_monitor(request):
-#     start_time = time.time()
-#     containers = client.containers.list(all=True)
-#     container_data = []
-
-#     def fetch_stats(container):
-#         stats = container.stats(stream=False)
-#         memory_usage = calculate_memory_usage(stats)
-#         cpu_usage = calculate_cpu_usage(stats)
-#         uptime = (
-#             format_uptime(container.attrs['State']['StartedAt'])
-#             if container.status == 'running' else 'N/A'
-#         )
-#         return {
-#             'id': container.short_id,
-#             'name': container.name,
-#             'image': container.image.tags[0] if container.image.tags else "Unknown",
-#             'ports': format_ports(container.attrs.get('NetworkSettings', {}).get('Ports', {})),
-#             'cpu_usage': cpu_usage,
-#             'memory_usage': memory_usage,
-#             'uptime': uptime,
-#             'status': container.status,
-#         }
-
-#     running_containers = [c for c in containers if c.status == 'running']
-#     with concurrent.futures.ThreadPoolExecutor() as executor:
-#         results = executor.map(fetch_stats, running_containers)
-
-#     for res in results:
-#         container_data.append(res)
-
-#     # For non-running containers, just show basic info
-#     for c in containers:
-#         if c.status != 'running':
-#             container_data.append({
-#                 'id': c.short_id,
-#                 'name': c.name,
-#                 'image': c.image.tags[0] if c.image.tags else "Unknown",
-#                 'ports': format_ports(c.attrs.get('NetworkSettings', {}).get('Ports', {})),
-#                 'cpu_usage': 'N/A',
-#                 'memory_usage': 'N/A',
-#                 'uptime': 'N/A',
-#                 'status': c.status,
-#             })
-
-#     print(f"Total time: {time.time() - start_time:.2f}s")
-#     return render(request, 'dashboard/docker_monitor.html', {'containers': container_data})
 def get_docker_stats(request):
     container_data = cache.get('docker_stats') or []
     return JsonResponse(container_data, safe=False)
@@ -533,7 +484,6 @@ def dashboard(request):
     apache_status = check_service_status('apache2')  # Use 'httpd' for Red Hat-based distros
     postgres_status = check_service_status('postgresql')
     alerts = alerts_number()[:3]
-    print(alerts)
     context = {
         'data': data,
         'vms': vm_data,
@@ -689,6 +639,7 @@ def node_list(request):
         "nodes": nodes,  # if you still need the raw queryset
         "node_data": sorted_node_data,
         "control_node": control_node_data,
+        "latest_alert_trig": "",
     }
 
     return render(request, "dashboard/node_list.html", context)
@@ -748,83 +699,68 @@ from .forms import AlertRuleForm
 from .models import AlertRule
 
 @login_required
+# def alert_list(request):
+#     """Display a list of alerts and handle creating a new alert rule."""
+#     alerts = AlertRule.objects.all()  # Fetch existing alerts
+
+#     if request.method == 'POST':
+#         # If form is submitted, process it
+#         form = AlertRuleForm(request.POST)
+#         if form.is_valid():
+#             alert_rule = form.save(commit=False)
+#             alert_rule.user = request.user  # assign current user if needed
+#             alert_rule.save()
+#             messages.success(request, "Alert rule created successfully!")
+#             # Redirect back to the same view so it doesn't re-submit on refresh
+#             return redirect('alert_list') 
+#     else:
+#         # If GET request, show an empty form
+#         form = AlertRuleForm()
+
+#     # Return the same template for both GET and POST
+#     return render(request, 'dashboard/alert_list.html', {
+#         'alerts': alerts,
+#         'form': form,
+#     })
+
+
 def alert_list(request):
-    """Display a list of alerts and handle creating a new alert rule."""
-    alerts = AlertRule.objects.all()  # Fetch existing alerts
-
-    if request.method == 'POST':
-        # If form is submitted, process it
-        form = AlertRuleForm(request.POST)
-        if form.is_valid():
-            alert_rule = form.save(commit=False)
-            alert_rule.user = request.user  # assign current user if needed
-            alert_rule.save()
-            messages.success(request, "Alert rule created successfully!")
-            # Redirect back to the same view so it doesn't re-submit on refresh
-            return redirect('alert_list') 
-    else:
-        # If GET request, show an empty form
-        form = AlertRuleForm()
-
-    # Return the same template for both GET and POST
-    return render(request, 'dashboard/alert_list.html', {
-        'alerts': alerts,
-        'form': form,
-    })
-
-
-# views.py
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .forms import AlertRuleForm
-from .models import AlertRule
-
-@login_required
-def alert_list(request):
-    """
-    Single view that shows all alerts and 
-    handles creation of new ones (if needed).
-    """
-    # Fetch all alerts
     alerts_queryset = AlertRule.objects.all()
-
-    # Define how we map metric_type to a user-friendly label
     METRIC_LABELS = {
         'CPU Usage': 'cpu_usage',
         'Memory Usage': 'memory_usage',
         'Disk Used': 'disk_used',
     }
 
-    # Build a list of alerts with nice display
     alerts = []
     for alert in alerts_queryset:
-        # Use get_display if metric_type is a ChoiceField, or manually map
         metric_name = METRIC_LABELS.get(alert.metric_type.name, alert.metric_type.name)
-        threshold_str = f"{alert.threshold}%"  # e.g. "90%"
+        threshold_str = f"{alert.comparison_type} {alert.threshold}%"
         
         alerts.append({
             'id': alert.id,
-            'metric_label': metric_name, 
+            'metric_label': metric_name,
             'threshold_str': threshold_str,
             'is_active': alert.is_active,
+            'severity': alert.get_severity_display(),
+            'cooldown': alert.cooldown_minutes,
+            'last_triggered': alert.last_triggered_at.strftime("%Y-%m-%d %H:%M") if alert.last_triggered_at else 'Never',
         })
 
-    # Handle form submission for creating a new alert rule
     if request.method == 'POST':
         form = AlertRuleForm(request.POST)
         if form.is_valid():
             alert_rule = form.save(commit=False)
-            alert_rule.user = request.user  # if needed
+            alert_rule.user = request.user
             alert_rule.save()
             messages.success(request, "Alert rule created successfully!")
-            return redirect('alert_list')  # reload this view
+            return redirect('alert_list')
     else:
         form = AlertRuleForm()
 
     return render(request, 'dashboard/alert_list.html', {
         'form': form,
-        'alerts': alerts,  # This is now the human-friendly list
+        'alerts': alerts,
     })
 
 
@@ -857,3 +793,192 @@ def log_priority_chart():
     }
     
     return context
+
+
+# views.py
+# views.py
+from collections import defaultdict
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def combined_alert_view(request):
+    import datetime
+    import json
+    from django.utils import timezone
+    from datetime import timedelta
+    from .forms import AlertRuleForm
+    from .models import AlertRule, Alert
+
+    def get_bucket_size_in_minutes(duration: timedelta, target_buckets: int = 25) -> int:
+        """
+        Same logic for dynamic bucket size...
+        """
+        total_minutes = duration.total_seconds() / 60.0
+        bucket_size = int(total_minutes / target_buckets)
+        if bucket_size <= 1:
+            return 1
+        elif bucket_size <= 5:
+            return 5
+        elif bucket_size <= 15:
+            return 15
+        elif bucket_size <= 30:
+            return 30
+        elif bucket_size <= 60:
+            return 60
+        elif bucket_size <= 120:
+            return 120
+        elif bucket_size <= 240:
+            return 240
+        else:
+            return int(bucket_size // 60 * 60)
+
+    # 1. Handle form submission for creating new alert rule
+    if request.method == 'POST':
+        form = AlertRuleForm(request.POST)
+        if form.is_valid():
+            alert_rule = form.save(commit=False)
+            alert_rule.user = request.user  # If user association is needed
+            alert_rule.save()
+            messages.success(request, "Alert rule created successfully!")
+            return redirect('combined_alert_view')
+    else:
+        form = AlertRuleForm()
+
+    # 2. Get all alert rules for the list
+    #    Group them by node so we can display them in tabs.
+    alerts_queryset = AlertRule.objects.select_related('node', 'metric_type').all()
+
+    # Example function that returns a textual metric label
+    METRIC_LABELS = {
+        'CPU Usage': 'cpu_usage',
+        'Memory Usage': 'memory_usage',
+        'Disk Used': 'disk_used',
+    }
+
+    # Group by node
+    grouped_alerts = defaultdict(list)
+    for alert_rule in alerts_queryset:
+        node_name = str(alert_rule.node)  # Adjust if you need a different attribute
+        grouped_alerts[node_name].append(alert_rule)
+
+    # 3. Parse chart time range from GET or default to last 24 hours
+    end_time = timezone.now()
+    start_time = end_time - timedelta(hours=24)
+
+    if 'start_time' in request.GET:
+        try:
+            parsed_start = datetime.datetime.fromisoformat(request.GET['start_time'])
+            if not timezone.is_aware(parsed_start):
+                parsed_start = timezone.make_aware(parsed_start)
+            start_time = parsed_start
+        except ValueError:
+            pass
+
+    if 'end_time' in request.GET:
+        try:
+            parsed_end = datetime.datetime.fromisoformat(request.GET['end_time'])
+            if not timezone.is_aware(parsed_end):
+                parsed_end = timezone.make_aware(parsed_end)
+            end_time = parsed_end
+        except ValueError:
+            pass
+
+    if end_time <= start_time:
+        end_time = start_time + timedelta(hours=24)
+
+    duration = end_time - start_time
+    bucket_size_minutes = get_bucket_size_in_minutes(duration)
+
+    # 4. Build time slots
+    time_slots = []
+    current = start_time
+    while current < end_time:
+        time_slots.append(current)
+        current += timedelta(minutes=bucket_size_minutes)
+    if not time_slots or time_slots[-1] < end_time:
+        time_slots.append(end_time)
+
+    # 5. Aggregate chart data
+    chart_data = []
+    for i in range(len(time_slots) - 1):
+        slot_start = time_slots[i]
+        slot_end = time_slots[i + 1]
+        alerts_in_slot = Alert.objects.filter(timestamp__gte=slot_start, timestamp__lt=slot_end)
+        chart_data.append({
+            'time': slot_start.isoformat(),
+            'info': alerts_in_slot.filter(severity='info').count(),
+            'warning': alerts_in_slot.filter(severity='warning').count(),
+            'critical': alerts_in_slot.filter(severity='critical').count(),
+        })
+
+    # 6. Prepare Chart.js datasets
+    datasets = [
+        {
+            'label': 'Info',
+            'data': [x['info'] for x in chart_data],
+            'borderColor': '#3B82F6',
+            'backgroundColor': '#3b82f610',
+            'borderWidth': 3,
+            'stack': 'stack_0'
+        },
+        {
+            'label': 'Warning',
+            'data': [x['warning'] for x in chart_data],
+            'backgroundColor': '#eab20810',
+            'borderColor': '#EAB308',
+            'borderWidth': 3,
+            'stack': 'stack_0'
+        },
+        {
+            'label': 'Critical',
+            'data': [x['critical'] for x in chart_data],
+            'backgroundColor': '#ef444410',
+            'borderColor': '#EF4444',
+            'borderWidth': 3,
+            'stack': 'stack_0'
+        }
+    ]
+
+    context = {
+        'form': form,
+        'grouped_alerts': dict(grouped_alerts),  # convert defaultdict to a regular dict
+        'start_time': start_time.isoformat(timespec='minutes'),
+        'end_time': end_time.isoformat(timespec='minutes'),
+        'labels': json.dumps([x['time'] for x in chart_data]),
+        'datasets': json.dumps(datasets),
+    }
+
+    return render(request, 'dashboard/combined_alerts.html', context)
+
+@login_required
+def toggle_alert_active(request, alert_id):
+    """
+    Simple view to toggle the is_active field of an AlertRule.
+    """
+    alert_rule = get_object_or_404(AlertRule, id=alert_id, user=request.user)
+    alert_rule.is_active = not alert_rule.is_active
+    alert_rule.save()
+    messages.success(request, f"Alert '{alert_rule.metric_type}' toggled to {alert_rule.is_active}.")
+    return redirect('combined_alert_view')
+
+@login_required
+def edit_alert(request, alert_id):
+    """
+    Allow editing an existing alert rule.
+    """
+    from .forms import AlertRuleForm
+    alert_rule = get_object_or_404(AlertRule, id=alert_id, user=request.user)
+
+    if request.method == 'POST':
+        form = AlertRuleForm(request.POST, instance=alert_rule)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Alert rule updated successfully!")
+            return redirect('combined_alert_view')
+    else:
+        form = AlertRuleForm(instance=alert_rule)
+
+    return render(request, 'dashboard/edit_alert.html', {'form': form, 'alert_rule': alert_rule})
