@@ -76,7 +76,7 @@ def compare(value, threshold, operator):
 
 
 # @shared_task
-# def check_alert_rules():
+# def check_alert_rules2    ():
 #     """
 #     Periodic Celery task that:
 #     1. Iterates over active AlertRules

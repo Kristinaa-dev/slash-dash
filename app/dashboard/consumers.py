@@ -10,7 +10,7 @@ class TerminalConsumer(AsyncWebsocketConsumer):
         self.ssh_client.connect(
             hostname="127.0.0.1",
             username="kristina",
-            password="1425  ",
+            password="1425",
         )
         self.channel = self.ssh_client.invoke_shell()
         asyncio.create_task(self.receive_from_server())
