@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.utils import timezone
 from django.core.mail import send_mail
 import sys
+import requests
 
 # ========== Models ==========
 
@@ -80,6 +81,21 @@ class LogEntry(models.Model):
     def __str__(self):
         return f"[{self.timestamp}] {self.service}: {self.message[:50]}"
 
+class Alert(models.Model):
+    SEVERITY_CHOICES = [
+        ('info', 'Info'),
+        ('warning', 'Warning'),
+        ('critical', 'Critical'),
+    ]
+
+    timestamp = models.DateTimeField(default=timezone.now)
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES)
+    message = models.TextField()
+    node = models.ForeignKey(Node, on_delete=models.CASCADE, null=True, blank=True)
+    metric_type = models.ForeignKey(MetricType, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.timestamp} - {self.severity}: {self.message[:50]}"
 
 class AlertRule(models.Model):
     COMPARISON_CHOICES = [
@@ -133,12 +149,17 @@ class AlertRule(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def trigger_alert(self, current_value):
         # This demonstration writes to a file for debugging; remove or adjust as needed.
         sys.stdout = open('debug.txt', 'w')
         print("ALERT RULES")
         print("ALERTTRIGGERED")
+        
+        
+        
+        # In AlertRule model's trigger_alert method - Add this before saving
+        
         
         now = timezone.now()
         # Respect cooldown if defined
@@ -152,6 +173,14 @@ class AlertRule(models.Model):
             f"Alert triggered! Node='{self.node.name}', "
             f"Metric='{self.metric_type.name}', Value={current_value}, "
             f"Rule=({self.comparison_type} {self.threshold})."
+        )
+        print(log_msg)
+        Alert.objects.create(
+            timestamp=now,
+            severity=self.severity,
+            message=log_msg,
+            node=self.node,
+            metric_type=self.metric_type
         )
 
         # Map severity to a LogEntry priority
@@ -167,7 +196,7 @@ class AlertRule(models.Model):
             hostname=self.node.name,
             service="Alert Service",
             priority=chosen_priority,
-            message=log_msg,
+            message="log_msg"
         )
 
         # 2. Send an email
@@ -184,8 +213,28 @@ class AlertRule(models.Model):
             email_body,
             settings.DEFAULT_FROM_EMAIL,
             [self.user.email],
-            fail_silently=True
+            # fail_silently=True
         )
+
+        discord_webhook_url = "https://discord.com/api/webhooks/1333389344693813290/F-HGLFmJMYHtdbOiyXeKIrAzUzoH_Bt_8NMhlQHFwgJ7rvZwJpQ0rSE2E4salxWBinP6"
+
+        if discord_webhook_url:
+            # Customize your Discord message format as you like
+            discord_message = (
+                f"**Alert:**\n"
+                f"- Node: {self.node.name}\n"       
+                f"- Metric: {self.metric_type.name}\n"
+                f"- Value: {current_value}\n"
+                f"- Rule: {self.comparison_type} {self.threshold}\n\n"
+                f"*Severity:* **{self.severity.upper()}**"
+            )
+            try:        
+                requests.post(discord_webhook_url, json={"content": discord_message}, timeout=5)
+            except requests.exceptions.RequestException as e:
+                # Log error or handle exception as needed
+                print(f"Failed to send Discord notification: {e}")
+
+
 
         # 3. Update last_triggered_at
         self.last_triggered_at = now
@@ -199,4 +248,5 @@ class AlertRule(models.Model):
 
 
 
-
+    
+# models.py - Add this new model
