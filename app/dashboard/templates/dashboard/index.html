@@ -95,35 +95,22 @@
         </ul>
       </div>
       <div class="status-card">
-        {% comment %} <h2 class="graph-title">Alerts</h2> {% endcomment %}
-        {% comment %} <ul class="list">
-          {% for alert in alerts %}
-            <li class="item">
-              <div class="service-name">{{ alert.node__name }}</div>
-              <div class="alert-status">Alerts set: {{ alert.alert_count }}</div>
-            </li>
-          {% endfor %}
-        </ul> {% endcomment %}
-          {% comment %} <div class="node-alerts"> {% endcomment %}
           <h2 class="graph-title">Node Alerts</h2>
-          {% comment %} </div> {% endcomment %}
-        
-          <div class="node-alerts-grid">
-            {% for alert in alerts %}
-              <div class="node-alert">
-                <div class="node-alert-name">{{ alert.node__name }}</div>
-                <div class="node-alert-count">{{ alert.alert_count }}</div>
-              </div>
-            {% endfor %}
-          </div>
+        <div class="node-alerts-grid">
+          {% for alert in alerts %}
+            <div class="node-alert">
+              <div class="node-alert-name">{{ alert.node__name }}</div>
+              <div class="node-alert-count">{{ alert.alert_count }}</div>
+            </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        var priority_labels = {{ priority_labels|safe }};  // e.g. ["Debug", "Info", "Notice", ...]
-        var priority_data = {{ priority_data|safe }};      // e.g. [10, 25, 3, 7, ...]
-
+        var priority_data = {{ priority_data|safe }};
+          var priority_labels = {{ priority_labels|safe }};
         // Set up the Chart.js bar chart
         var ctx2 = document.getElementById('priorityChart').getContext('2d');
         var priorityChart = new Chart(ctx2, {

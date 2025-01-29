@@ -2,52 +2,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Django App{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}My Django App{% endblock %}</title>
+  <!-- Link to your new sidebar.css -->
+  <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Sidebar -->
-         {% if user.is_authenticated %}
-        <div class="side-panel collapsed" id="sidebar">
-            <div class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars icon"></i></div>
-            <ul>
-                {% comment %} <li><a href="#"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li> {% endcomment %}
-                <li><a href="{% url 'dashboard' %}"><i class="fas fa-chart-line icon"></i><span class="text">Analytics</span></a></li>
-                <li><a href="{% url 'docker_monitor' %}"><i class="fab fa-docker icon"></i><span class="text">Docker</span></a></li>
-                {% if user.is_superuser %}
-                <li><a href="{% url 'terminal' %}"><i class="fas fa-terminal icon"></i><span class="text">Terminal</span></a></li>
-                {% endif %}
-                <li><a href="{% url 'logs' %}"><i class="fas fa-file-alt icon"></i><span class="text">Logs</span></a></li>
-                <li><a href="{% url 'alert_list' %}"><i class="fas fa-bell icon"></i><span class="text">Alerts</span></a></li>
-                <li><a href="{% url 'node_list' %}"><i class="fas fa-network-wired icon"></i><span class="text">Nodes</span></a></li>
+  <div class="container">
+    {% if user.is_authenticated %}
+    <!-- Use both the ID (#sidebar) and the 'side-panel' class -->
+    <div id="sidebar" class="side-panel collapsed">
+      <!-- Toggle button -->
+      <div class="toggle-btn" onclick="toggleSidebar()">
+        <i class="fas fa-bars icon"></i>
+      </div>
 
-
-
-                <li><a href="{% url 'admin:index' %}"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
-            </ul>
-            <!-- Logout at the bottom -->
-            <div class="logout">
-                <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt icon"></i><span class="text">Logout</span></a>
-            </div>
-        </div>
+      <ul>
+        <!-- Each li checks if it's the active page -->
+        <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+          <a href="{% url 'dashboard' %}">
+            <i class="fas fa-chart-line icon"></i>
+            <span class="text">Analytics</span>
+          </a>
+        </li>
+        <li class="{% if request.resolver_match.url_name == 'docker_monitor' %}active{% endif %}">
+          <a href="{% url 'docker_monitor' %}">
+            <i class="fab fa-docker icon"></i>
+            <span class="text">Docker</span>
+          </a>
+        </li>
+        {% if user.is_superuser %}
+        <li class="{% if request.resolver_match.url_name == 'terminal' %}active{% endif %}">
+          <a href="{% url 'terminal' %}">
+            <i class="fas fa-terminal icon"></i>
+            <span class="text">Terminal</span>
+          </a>
+        </li>
         {% endif %}
-        <!-- Main Content -->
-        <div class="main-content">
-            {% block content %}
-            <!-- Main content will go here -->
-            {% endblock %}
-        </div>
-    </div>
+        <li class="{% if request.resolver_match.url_name == 'logs' %}active{% endif %}">
+          <a href="{% url 'logs' %}">
+            <i class="fas fa-file-alt icon"></i>
+            <span class="text">Logs</span>
+          </a>
+        </li>
+        <li class="{% if request.resolver_match.url_name == 'combined_alert_view' %}active{% endif %}">
+          <a href="{% url 'combined_alert_view' %}">
+            <i class="fas fa-bell icon"></i>
+            <span class="text">Alerts</span>
+          </a>
+        </li>
+        <li class="{% if request.resolver_match.url_name == 'node_list' %}active{% endif %}">
+          <a href="{% url 'node_list' %}">
+            <i class="fas fa-network-wired icon"></i>
+            <span class="text">Nodes</span>
+          </a>
+        </li>
+        <li class="{% if request.resolver_match.url_name == 'admin:index' %}active{% endif %}">
+          <a href="{% url 'admin:index' %}">
+            <i class="fas fa-cog icon"></i>
+            <span class="text">Settings</span>
+          </a>
+        </li>
+      </ul>
 
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('expanded');
-            document.getElementById('sidebar').classList.toggle('collapsed');
-        }
-    </script>
+      <!-- Logout at the bottom -->
+      <div class="logout">
+        <a href="{% url 'logout' %}">
+          <i class="fas fa-sign-out-alt icon"></i>
+          <span class="text">Logout</span>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+      {% block content %}
+      <!-- your page content -->
+      {% endblock %}
+    </div>
+  </div>
+
+  <!-- Script to toggle the 'expanded' / 'collapsed' classes -->
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('expanded');
+      sidebar.classList.toggle('collapsed');
+    }
+  </script>
 </body>
 </html>

@@ -14,10 +14,6 @@
 <link rel="stylesheet" href="{% static 'css/alerts.css' %}">
 
 
-{% comment %} WORK ON THE FUCKING ADD ALERTS SHIT {% endcomment %}
-
-
-
 <script>
   // JS for opening/closing the "Create Alert" modal
   function openModal() {
@@ -55,9 +51,7 @@
         <!-- The toggle switch on the right -->
         <div class="alert-toggle">
 			<label class="switch">
-				<input type="checkbox"
-				{% if alert.is_active %} checked {% endif %}
-				disabled /> 
+				<input type="checkbox" {% if alert.is_active %} checked {% endif %} disabled /> 
 				<!-- 
               'disabled' just for visual in this example. 
               If you want it truly functional (toggle in real-time),
@@ -78,30 +72,41 @@
     <h2 class="modal-title">Create Alert Rule</h2>
     <p class="modal-description">Enter the details for the new alert rule.</p>
 	
+
     <form method="POST">
       {% csrf_token %}
       <div class="form-group">
-        {{ form.node.label_tag }}
-        {{ form.node }}
+          {{ form.node.label_tag }}
+          {{ form.node }}
       </div>
       <div class="form-group">
-		  {{ form.metric_type.label_tag }}
-		  {{ form.metric_type }}
-		</div>
-		<div class="form-group">
-			{{ form.comparison_type.label_tag }}
-			{{ form.comparison_type }}
-		</div>
-		<div class="form-group">
-			{{ form.threshold.label_tag }}
-			{{ form.threshold }}
-		</div>
-		<div class="form-group">
-			{{ form.is_active.label_tag }}
-			{{ form.is_active }}
-		</div>
-		<button type="submit" class="submit-btn">Create</button>
-    </form>
+          {{ form.metric_type.label_tag }}
+          {{ form.metric_type }}
+      </div>
+      <div class="form-group">
+          {{ form.comparison_type.label_tag }}
+          {{ form.comparison_type }}
+      </div>
+      <div class="form-group">
+          {{ form.threshold.label_tag }}
+          {{ form.threshold }}
+      </div>
+      <!-- New Fields -->
+      <div class="form-group">
+          {{ form.severity.label_tag }}
+          {{ form.severity }}
+      </div>
+      <div class="form-group">
+          {{ form.cooldown_minutes.label_tag }}
+          {{ form.cooldown_minutes }}
+      </div>
+      <div class="form-group">
+          {{ form.is_active.label_tag }}
+          {{ form.is_active }}
+      </div>
+      <button type="submit" class="submit-btn">Create</button>
+  </form>
+
 </div>
 </div>
 {% if messages %}

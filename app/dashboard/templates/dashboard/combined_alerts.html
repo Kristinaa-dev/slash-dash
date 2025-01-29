@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}
+  Alerts Dashboard
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/graphs.css' %}">
+<link rel="stylesheet" href="{% static 'css/nodes.css' %}">
+<link rel="stylesheet" href="{% static 'css/modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/alerts.css' %}">
+
+<!-- Chart.js Dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
+
+<h2 class="title">/dash/alerts</h2>
+
+<!-- 
+  Place "Add Alert" button in a more prominent spot
+  This is a floating button example (top-right).
+-->
+
+<!-- Chart Section -->
+<div class="chart-section">
+  <div class="chart-header">
+    <h2>Alerts Timeline</h2>
+    <form method="get" action="" class="time-range">
+      <div class="time-range-form">
+		  <label for="start_time" class="label_time">Start:</label>
+		  <input type="datetime-local" id="start_time" name="start_time"
+		  value="{{ start_time|slice:'0:16' }}" class="form-input-dark">
+		  
+		  <label for="end_time" class="label_time">End:</label>
+		  <input type="datetime-local" id="end_time" name="end_time"
+		  value="{{ end_time|slice:'0:16' }}" class="form-input-dark">
+		</div>
+		<button type="submit" class="submit-btn">Update Range</button>
+    </form>
+</div>
+
+<canvas id="alertsChart" width="1000" height="200"></canvas>
+</div>
+
+{% comment %} <hr style="margin: 20px 0; border-color: #ffffff33;"> {% endcomment %}
+
+<!-- Tabs for Active Alerts by Node -->
+<div class="active-alert">
+
+	<h2 class="header-title">Active Alerts by Node</h2>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tabs">
+	
+	<div class="tab-nav">
+		<div class="tabs-buttons">
+			{% for node_name, alerts_in_node in grouped_alerts.items %}
+			<button 
+			class="tab-button {% if forloop.first %}active{% endif %}" 
+			onclick="openTab('{{ node_name|slugify }}')">
+			{{ node_name }}
+		</button>
+		{% endfor %}
+	</div>
+		
+		<div>
+		  <button class="submit-btn submit-dark" onclick="openModal()">
+			+ Add Alert
+		  </button>
+		</div>
+	</div>
+	
+	<!-- Tab Content -->
+	{% for node_name, alerts_in_node in grouped_alerts.items %}
+	  <div 
+		id="tab-{{ node_name|slugify }}" 
+		class="tab-content {% if forloop.first %}active{% endif %}" 
+		style="{% if not forloop.first %}display: none;{% else %}display: block;{% endif %};">
+		
+		{% if alerts_in_node %}
+		  <div class="alert-list">
+			{% for alert_rule in alerts_in_node %}
+			  <div class="alert-card {% if alert_rule.is_active %}inactive-alert-bg{% else %}active-alert-bg{% endif %}">
+				<div class="alert-info">
+				  <h3 class="alert-title">{{ alert_rule.metric_type.name }}</h3>
+				  <p class="alert-threshold">Threshold: {{ alert_rule.threshold }}%</p>
+				</div>
+				<div class="alert-actions" style="display: flex; align-items: center; gap: 10px;">
+				  <!-- Toggle Active Form -->
+				  <form method="POST" action="{% url 'toggle_alert_active' alert_rule.id %}">
+					{% csrf_token %}
+					<button type="submit" class="toggle-btn-alrt {% if alert_rule.is_active %}inactive-btn{% else %}active-btn{% endif %}" >
+					  {% if alert_rule.is_active %}
+						Activate
+					  {% else %}
+						Deactivate
+					  {% endif %}
+					</button>
+				  </form>
+	
+				</div>
+			  </div>
+			{% endfor %}
+		  </div>
+		{% else %}
+		  <p style="color: #ccc;">No alerts for this node.</p>
+		{% endif %}
+	  </div>
+	{% endfor %}
+</div>
+
+<!-- Create Alert Modal -->
+<div id="addNodeModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <h2 class="modal-title">Create Alert Rule</h2>
+    <p class="modal-description">Enter the details for the new alert rule.</p>
+
+    <form method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        {{ form.node.label_tag }}
+        {{ form.node }}
+      </div>
+      <div class="form-group">
+        {{ form.metric_type.label_tag }}
+        {{ form.metric_type }}
+      </div>
+      <div class="form-group">
+        {{ form.comparison_type.label_tag }}
+        {{ form.comparison_type }}
+      </div>
+      <div class="form-group">
+        {{ form.threshold.label_tag }}
+        {{ form.threshold }}
+      </div>
+      <div class="form-group">
+        {{ form.severity.label_tag }}
+        {{ form.severity }}
+      </div>
+      <div class="form-group">
+        {{ form.cooldown_minutes.label_tag }}
+        {{ form.cooldown_minutes }}
+      </div>
+      <div class="form-group">
+        {{ form.is_active.label_tag }}
+        {{ form.is_active }}
+      </div>
+      <button type="submit" class="submit-btn">
+        Create
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+  // Modal Functions
+  function openModal() {
+    document.getElementById("addNodeModal").style.display = "block";
+  }
+  function closeModal() {
+    document.getElementById("addNodeModal").style.display = "none";
+  }
+  window.onclick = function(event) {
+    if (event.target == document.getElementById("addNodeModal")) {
+      closeModal();
+    }
+  };
+
+  // Tabs Functions
+  function openTab(tabId) {
+    // Hide all tab contents
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(tc => {
+      tc.style.display = 'none';
+      tc.classList.remove('active');
+    });
+
+    // Remove active class from all tab buttons
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(tb => tb.classList.remove('active'));
+    tabButtons.forEach(tb => {
+      //tb.style.backgroundColor = '#1f2937';
+    });
+
+    // Show the selected tab content
+    const selectedTab = document.getElementById('tab-' + tabId);
+    if (selectedTab) {
+      selectedTab.style.display = 'block';
+      selectedTab.classList.add('active');
+    }
+
+    // Add active class to the clicked tab button
+    const clickedButton = [...tabButtons].find(tb => tb.getAttribute('onclick') === `openTab('${tabId}')`);
+    if (clickedButton) {
+      clickedButton.classList.add('active');
+      //clickedButton.style.backgroundColor = '#374151'; // Active tab color
+    }
+  }
+
+  // Automatically activate the first tab on page load
+  document.addEventListener("DOMContentLoaded", function() {
+    const firstTabButton = document.querySelector('.tab-button');
+    if (firstTabButton) {
+      const onclickAttr = firstTabButton.getAttribute('onclick');
+      if (onclickAttr) {
+        const tabIdMatch = onclickAttr.match(/openTab\('(.*)'\)/);
+        if (tabIdMatch && tabIdMatch[1]) {
+          openTab(tabIdMatch[1]);
+        }
+      }
+    }
+  });
+
+  // Chart Initialization
+  const labels = JSON.parse('{{ labels|safe }}');
+  const datasets = JSON.parse('{{ datasets|safe }}');
+
+  const ctx = document.getElementById('alertsChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      interaction: {
+        mode: 'nearest',
+        intersect: false
+      },
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: 'hour' },
+          ticks: { color: '#cccccc' },
+          grid: { color: '#ffffff1f' },
+          categoryPercentage: 0.9,
+          barPercentage: 0.9
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#cccccc' },
+          grid: { color: '#ffffff1f' }
+        }
+      },
+      plugins: {
+        legend: { 
+          display: false,
+          labels: { color: '#ddd' } 
+        },
+        zoom: {
+          pan: { enabled: false },
+          zoom: {
+            wheel: { enabled: false },
+            drag: {
+              enabled: true,
+              backgroundColor: 'rgba(255, 255, 255, 0.15)'
+            },
+            mode: 'x',
+            onZoomComplete: ({ chart }) => {
+              const xScale = chart.scales.x;
+              window.location.href = `?start_time=${new Date(xScale.min).toISOString()}&end_time=${new Date(xScale.max).toISOString()}`;
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
+
+{% comment %} {% if messages %}
+  <div class="messages-container">
+    <ul class="messages-list">
+      {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %} {% endcomment %}
+{% endblock %}
+  
