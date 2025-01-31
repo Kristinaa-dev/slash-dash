@@ -7,7 +7,7 @@ from django.utils import timezone
 from dashboard.models import Alert
 
 class Command(BaseCommand):
-    help = "Create a bunch of fake Alerts for te	sting."
+    help = "Create a bunch of fake Alerts for testing."
 
     def add_arguments(self, parser):
         parser.add_argument('--num', type=int, default=50,
