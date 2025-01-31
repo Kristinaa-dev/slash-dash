@@ -877,4 +877,4 @@ def edit_alert(request, alert_id):
         form = AlertRuleForm(instance=alert_rule)
 
     return render(request, 'dashboard/edit_alert.html', {'form': form, 'alert_rule': alert_rule})
-    
+        
