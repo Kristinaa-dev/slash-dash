@@ -8,8 +8,8 @@ class TerminalConsumer(AsyncWebsocketConsumer):
         self.ssh_client = paramiko.SSHClient()
         self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.ssh_client.connect(
-            hostname="127.0.0.1",
-            username="kristina",
+            hostname="192.168.100.13",
+            username="rpi",
             password="1425",
         )
         self.channel = self.ssh_client.invoke_shell()
