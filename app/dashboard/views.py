@@ -236,69 +236,6 @@ def calculate_cpu_usage(stats):
 
 # DB TEST
 @login_required
-def dashboard2(request):
-    # Define time range (last 10 minutes)
-    end_time = timezone.now()
-    start_time = end_time - datetime.timedelta(minutes=10)
-
-    # Get metric types
-    metrics = MetricType.objects.all()
-
-    data = {}
-    for metric in metrics:
-        # Retrieve data points for each metric within the last 10 minutes
-        data_points = TimeSeriesData.objects.filter(
-            metric_type=metric,
-            timestamp__range=(start_time, end_time)
-        ).order_by('timestamp')
-
-        # Prepare data for Chart.js
-        data[metric.name] = {
-            'timestamps': [dp.timestamp.strftime("%H:%M") for dp in data_points],
-            'values': [dp.value for dp in data_points],
-            'unit': metric.unit,
-        }
-
-    context = {'data': data}
-    return render(request, 'dashboard/index.html', context)
-
-def latest_data2(request):
-    from math import floor
-    metrics = MetricType.objects.all()
-    data = {}
-
-    for metric in metrics:
-        latest_data_point = TimeSeriesData.objects.filter(
-            metric_type=metric
-        ).order_by('-timestamp').first()
-
-        if latest_data_point:
-            value = latest_data_point.value
-            if metric.name == 'server_uptime':
-                total_seconds = int(value)
-                days = total_seconds // 86400
-                hours = (total_seconds % 86400) // 3600
-                minutes = (total_seconds % 3600) // 60
-                seconds = total_seconds % 60
-
-                if days > 0:
-                    display_value = f"{days}d {hours}h"
-                elif hours > 0:
-                    display_value = f"{hours}h {minutes}m"
-                elif minutes > 0:
-                    display_value = f"{minutes}m {seconds}s"
-                else:
-                    display_value = f"{seconds}s"
-            else:
-                display_value = value
-
-            data[metric.name] = {
-                'timestamp': latest_data_point.timestamp.strftime("%H:%M"),
-                'value': display_value,
-                'unit': metric.unit,
-            }
-
-    return JsonResponse(data)
 
 # LOGS
 def logs(request):
@@ -371,29 +308,6 @@ def custom_login(request):
 def custom_logout(request):
     logout(request)
     return redirect('login')
-
-def dashboard2(request):
-    end_time = timezone.now()
-    start_time = end_time - timezone.timedelta(minutes=15)  # Adjust as needed
-
-    metrics = MetricType.objects.filter(name__in=['cpu_usage', 'memory_usage'])
-
-    data = {}
-    for metric in metrics:
-        data_points = TimeSeriesData.objects.filter(
-            metric_type=metric,
-            timestamp__range=(start_time, end_time)
-        ).order_by('timestamp')[:15]  # Get last 15 points
-
-        data[metric.name] = {
-            'timestamps': [dp.timestamp.strftime("%H:%M") for dp in data_points],
-            'values': [dp.value for dp in data_points],
-            'unit': metric.unit,
-        }
-
-    context = {'data': data}
-    return render(request, 'dashboard/index.html', context)
-
 
 import libvirt
 import subprocess
@@ -561,34 +475,11 @@ from django.utils.timesince import timesince
 def node_list(request):
     # Retrieve all nodes from the database
     nodes = Node.objects.all()
-
-    # Gather specific data for control node (if desired)
-    online_nodes_count = Node.objects.filter(status='online').count()
-    offline_nodes_count = Node.objects.filter(status='offline').count()
-    hostname = socket.gethostname()
-
-    
-    tz_aware_boot_time = timezone.make_aware(datetime.fromtimestamp(psutil.boot_time()))
-    uptime = timesince(tz_aware_boot_time, timezone.now())
-    
-    control_node = Node.objects.get(name='Control')  # or you can remove this if unused
-    
-    control_node_data = {
-        "hostname": hostname,
-        "ip": control_node.ip_address,
-        "status": control_node.status,
-        "uptime": uptime,
-        "last_check_in": control_node.last_check_in,
-        "online_nodes": online_nodes_count,
-        "offline_nodes": offline_nodes_count,
-        "total_nodes": online_nodes_count + offline_nodes_count,
-    }
-    # Build up your node_data dictionary
     node_data = {}
 
     for node in nodes:
         # Example: Force the Control node to always be "online" (if that is your requirement)
-        if node.node_type == 'Control':
+        if node.node_type == 'Control' and node.name == 'Control':
             node.status = 'online'
             node.last_check_in = timezone.now()
             node.save()
@@ -613,6 +504,29 @@ def node_list(request):
             "metrics": metrics,
         }
 
+    # Gather specific data for control node (if desired)
+    online_nodes_count = Node.objects.filter(status='online').count()
+    offline_nodes_count = Node.objects.filter(status='offline').count()
+    hostname = socket.gethostname()
+
+    
+    tz_aware_boot_time = timezone.make_aware(datetime.fromtimestamp(psutil.boot_time()))
+    uptime = timesince(tz_aware_boot_time, timezone.now())
+    
+    control_node = Node.objects.get(name='Control')  # or you can remove this if unused
+    
+    control_node_data = {
+        "hostname": hostname,
+        "ip": control_node.ip_address,
+        "status": control_node.status,
+        "uptime": uptime,
+        "last_check_in": control_node.last_check_in,
+        "online_nodes": online_nodes_count,
+        "offline_nodes": offline_nodes_count,
+        "total_nodes": online_nodes_count + offline_nodes_count,
+    }
+    # Build up your node_data dictionary
+
     def sort_key(item):
         """
         item is a tuple: (node_name, data_dict)
@@ -622,17 +536,16 @@ def node_list(request):
         # Priority for node_type 'Control' => 0
         # Priority for status 'online' => 1
         # Priority for everything else (offline, etc.) => 2
-        if data['node_type'] == 'Control':
+        if data['node_type'] == 'Control' and data['status'] == 'online':
             return 0
         elif data['status'] == 'online':
             return 1
-        return 2
+        elif data['status'] == 'offline' and data['node_type'] == 'Control':
+            return 2
+        return 3
 
     # Sort node_data by our custom key
-    # print(node_data)
-
     sorted_node_data = sorted(node_data.items(), key=sort_key)
-    # print(sorted_node_data)
     # Pass sorted data to the template.
     # Notice now it’s a list of tuples, so adjust your template loop accordingly.
     context = {
@@ -699,31 +612,6 @@ from .forms import AlertRuleForm
 from .models import AlertRule
 
 @login_required
-# def alert_list(request):
-#     """Display a list of alerts and handle creating a new alert rule."""
-#     alerts = AlertRule.objects.all()  # Fetch existing alerts
-
-#     if request.method == 'POST':
-#         # If form is submitted, process it
-#         form = AlertRuleForm(request.POST)
-#         if form.is_valid():
-#             alert_rule = form.save(commit=False)
-#             alert_rule.user = request.user  # assign current user if needed
-#             alert_rule.save()
-#             messages.success(request, "Alert rule created successfully!")
-#             # Redirect back to the same view so it doesn't re-submit on refresh
-#             return redirect('alert_list') 
-#     else:
-#         # If GET request, show an empty form
-#         form = AlertRuleForm()
-
-#     # Return the same template for both GET and POST
-#     return render(request, 'dashboard/alert_list.html', {
-#         'alerts': alerts,
-#         'form': form,
-#     })
-
-
 def alert_list(request):
     alerts_queryset = AlertRule.objects.all()
     METRIC_LABELS = {
@@ -861,8 +749,15 @@ def combined_alert_view(request):
     # Group by node
     grouped_alerts = defaultdict(list)
     for alert_rule in alerts_queryset:
-        node_name = str(alert_rule.node)  # Adjust if you need a different attribute
+        node_name = str(alert_rule.node)
         grouped_alerts[node_name].append(alert_rule)
+
+    # Sort so that active alerts come first
+    for node_name in grouped_alerts:
+        grouped_alerts[node_name].sort(key=lambda ar: not ar.is_active)
+
+    # Ensure "Control" is always first
+    grouped_alerts = dict(sorted(grouped_alerts.items(), key=lambda item: item[0] != "Control"))
 
     # 3. Parse chart time range from GET or default to last 24 hours
     end_time = timezone.now()
@@ -982,3 +877,4 @@ def edit_alert(request, alert_id):
         form = AlertRuleForm(instance=alert_rule)
 
     return render(request, 'dashboard/edit_alert.html', {'form': form, 'alert_rule': alert_rule})
+    

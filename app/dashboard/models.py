@@ -8,8 +8,6 @@ from django.core.mail import send_mail
 import sys
 import requests
 
-# ========== Models ==========
-
 class Node(models.Model):
     NODE_TYPE_CHOICES = [
         ('Control', 'Control'),
@@ -174,7 +172,6 @@ class AlertRule(models.Model):
             f"Metric='{self.metric_type.name}', Value={current_value}, "
             f"Rule=({self.comparison_type} {self.threshold})."
         )
-        print(log_msg)
         Alert.objects.create(
             timestamp=now,
             severity=self.severity,
@@ -196,7 +193,7 @@ class AlertRule(models.Model):
             hostname=self.node.name,
             service="Alert Service",
             priority=chosen_priority,
-            message="log_msg"
+            message=f"Alert triggered! Node='{self.node.name}',Metric='{self.metric_type.name}', Value={current_value}, Rule=({self.comparison_type} {self.threshold})."
         )
 
         # 2. Send an email
@@ -234,9 +231,6 @@ class AlertRule(models.Model):
                 # Log error or handle exception as needed
                 print(f"Failed to send Discord notification: {e}")
 
-
-
-        # 3. Update last_triggered_at
         self.last_triggered_at = now
         self.save()
 
@@ -245,8 +239,3 @@ class AlertRule(models.Model):
             f"AlertRule (User: {self.user}, Node: {self.node}, "
             f"Metric: {self.metric_type}, {self.comparison_type} {self.threshold})"
         )
-
-
-
-    
-# models.py - Add this new model
