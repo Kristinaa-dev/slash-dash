@@ -43,16 +43,17 @@ class MetricType(models.Model):
 
 
 class TimeSeriesData(models.Model):
-    """
-    Stores the time series data for a given metric on a specific node.
-    """
     node = models.ForeignKey(Node, on_delete=models.CASCADE, related_name='metrics')
     metric_type = models.ForeignKey(MetricType, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(db_index=True)
     value = models.FloatField()
 
-    def __str__(self):
-        return f"{self.node.name} | {self.metric_type.name} at {self.timestamp}"
+    class Meta:
+        indexes = [
+            models.Index(fields=['metric_type', 'timestamp']),
+            models.Index(fields=['node', 'timestamp']),
+        ]           
+        ordering = ['timestamp']
 
 
 class LogEntry(models.Model):
