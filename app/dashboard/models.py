@@ -214,7 +214,7 @@ class AlertRule(models.Model):
             # fail_silently=True
         )
 
-        discord_webhook_url = "https://discord.com/api/webhooks/1333389344693813290/F-HGLFmJMYHtdbOiyXeKIrAzUzoH_Bt_8NMhlQHFwgJ7rvZwJpQ0rSE2E4salxWBinP6"
+        discord_webhook_url = "https://discord.com/api/webhooks/<URL>"
 
         if discord_webhook_url:
             # Customize your Discord message format as you like
