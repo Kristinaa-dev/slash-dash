@@ -4,7 +4,7 @@ click==8.1.8
 cryptography==44.0.0
 Flask==2.3.2
 itsdangerous==2.2.0
-Jinja2==3.1.5
+Jinja2==3.1.6
 MarkupSafe==3.0.2
 psutil==6.1.1
 pycparser==2.22
