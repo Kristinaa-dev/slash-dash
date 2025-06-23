@@ -108,7 +108,7 @@ A quick preview of Slash Dash in action:
 ![Node Overview](docs/obrazky/nodes.png)
 
 ### 💻 Web Terminal  
-![Web Terminal](docs/obrazky/terminal.png)
+![Web Terminal](docs/obrazky/terminal_fixed.png)
 
 ### 🔐 Login Page  
 ![Login Screen](docs/obrazky/login.png)
